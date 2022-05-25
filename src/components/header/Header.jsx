@@ -8,6 +8,7 @@ import logodark from '../../assets/images/logo/logo_dark.png'
 import logodark2x from '../../assets/images/logo/logo_dark@2x.png'
 import imgsun from '../../assets/images/icon/sun.png'
 import avt from '../../assets/images/avatar/avt-2.jpg'
+import logo_luxurio from '../../assets/images/logo/logo_Luxurio.png'
 
 
 

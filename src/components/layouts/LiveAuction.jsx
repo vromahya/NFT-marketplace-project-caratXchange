@@ -60,10 +60,9 @@ const LiveAuction = props => {
                                                             <div className="swiper-slide">
                                                                 <div className="slider-item">										
                                                                     <div className="sc-card-product">
-                                                                        <div className="card-media">
-                                                                            
+                                                                        <div className="card-media">                                                                            
                                                                             <Link to={`/item-details-02/${item.tokenId}`}><img src={item.img} alt="axies" /></Link>
-                                                                            <Link to="/login" className="wishlist-button heart"><span className="number-like">{item.wishlist}</span></Link>
+                                                                            {/* <Link to="/login" className="wishlist-button heart"><span className="number-like">{item.wishlist}</span></Link> */}
                                                                             <div className="featured-countdown">
                                                                                 <span className="slogan"></span>
                                                                                 <Countdown date={Date.now() + 500000000}>
@@ -75,8 +74,7 @@ const LiveAuction = props => {
                                                                             </div>
                                                                         </div>
                                                                         <div className="card-title">
-                                                                            <h5><Link to="/item-details-01">"{item.title}"</Link></h5>
-                                                                            <div className="tags">{item.tags}</div>
+                                                                            <h5><Link to={`/item-details-02/${item.tokenId}`}>"{item.title}"</Link></h5>
                                                                         </div>
                                                                         <div className="meta-info">
                                                                             <div className="author">
