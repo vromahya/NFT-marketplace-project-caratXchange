@@ -1,5 +1,5 @@
 
-  export const auctionAddress = "0xE148Fd80e0c1F8232332567327752B5782304aBb"
-  export const marketplaceAddress = "0x517bF0F78a0de39E16EFb44154cD7B9A033826A0"
-  export const nftMintAddress = "0x3b27e19BB220159B97d2DB4a4c754f1979e08697"
+  export const auctionAddress = "0x0231C85bA25e9651A8610faD56b067949F1baae7"
+  export const marketplaceAddress = "0x9110EeFd5e4a1D650fCdB661f3b4f123112d5E5a"
+  export const nftMintAddress = "0xb28CEef6644c5E5d9738c6D845476BDc68C6EA4b"
   

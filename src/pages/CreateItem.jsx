@@ -112,14 +112,15 @@ async function listNFTForDirectSale() {
 
   let transaction = await mint.mint(url);
   let tx = await transaction.wait();
+    
+    let eventVal = await tx.events.find(event => event.event === "Transfer").args.tokenId;
+    
 
-  let eventVal = tx.events.find(event => event.event === "Transfer").args.tokenId;
-
   
-  let tokenId = Number(eventVal._hex);
+    let tokenId = Number(eventVal._hex);
   
   
-  let market = new ethers.Contract(
+    let market = new ethers.Contract(
       marketplaceAddress,
       MarketPlace.abi,
       signer
@@ -127,17 +128,17 @@ async function listNFTForDirectSale() {
       )
       const price = ethers.utils.parseUnits(directBuyData.price, 'ether');
 
-  let createDirectSale = await market.createDirectSaleItem(tokenId, price);
-  await createDirectSale.wait();
-  notify()
+    let createDirectSale = await market.createDirectSaleItem(tokenId, price);
+    await createDirectSale.wait();
+    notify()
 
-  setTimeout(() => {
-      navigate("/");
-  }, 5000);
-  } catch (error) {
-      console.log(error);
-  }
-  
+    setTimeout(() => {
+        navigate("/");
+    }, 5000);
+    } catch (error) {
+        console.log(error);
+    }
+    
 }
 async function listNFTForAuction(){
 
@@ -152,7 +153,7 @@ async function listNFTForAuction(){
 
     const address = signer.getAddress();
     
-    const startTime = new Date().getTime();
+    const startTime = Date.now()/1000;
     // console.log('clean getting address and startime')
     
     
@@ -166,6 +167,8 @@ async function listNFTForAuction(){
         let transaction = await mint.mint(url);
         let tx = await transaction.wait();
         
+        console.log(tx.events)
+
         let eventVal = tx.events.find(event => event.event === "Transfer").args.tokenId;
         
         

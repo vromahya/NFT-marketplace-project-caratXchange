@@ -132,14 +132,15 @@ contract MarketPlace is ReentrancyGuard {
     }
 
     function settleDirectSale(uint256 _tokenId) external payable nonReentrant {
-        require(
-            msg.value == tokenIdToMarketItemMeta[_tokenId].reservePrice,
-            "RESERVE_PRICE_NOT_MET"
-        );
+        
         tokenIdToMarketItemMeta[_tokenId].onAuction = false;
         tokenIdToMarketItemMeta[_tokenId].onDirectSale = false;
         tokenIdToMarketItemMeta[_tokenId].orderState.started = true;
+        
         address seller = tokenIdToMarketItemMeta[_tokenId].seller;
+
+        payable(seller).transfer(msg.value);
+
         IERC721(tokenContract).transferFrom(seller, msg.sender, _tokenId);
 
         emit DirectSaleDone(_tokenId, msg.value);

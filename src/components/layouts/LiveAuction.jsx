@@ -13,12 +13,10 @@ import 'swiper/scss/pagination';
 const LiveAuction = props => {
 
     let data = props.data.filter(data=> data.onAuction===true);
-    console.log(data)
-   
+    
+    
     data = data.filter(data=>(Date.now()/1000)<Number(data.auctionEndAt));
-    
-    data = data.filter(data=>Number(data.auctionEndAt)<864001);
-    
+      
     
 
     const [modalShow, setModalShow] = useState(false);
