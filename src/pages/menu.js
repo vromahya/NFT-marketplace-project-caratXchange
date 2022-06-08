@@ -11,7 +11,7 @@ const menus = [
   },
   {
     id: 3,
-    name: 'Activity',
+    name: 'Sellers',
     links: '/activity',
   },
   {

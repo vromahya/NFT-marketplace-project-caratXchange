@@ -1,18 +1,50 @@
-import React , { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React , { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import Header from '../components/header/Header';
 import Footer from '../components/footer/Footer';
 import TopSeller from '../components/layouts/authors/TopSeller';
 import topSellerData from '../assets/fake-data/data-top-seller'
 import popularCollectionData from '../assets/fake-data/data-popular-collection';
+import axios from 'axios';
+import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
+
+const APIURL = 'https://api.thegraph.com/subgraphs/name/vromahya/forevercarat-nftquery'
+
+
+const client = new ApolloClient({
+  uri: APIURL,
+  cache: new InMemoryCache(),
+})
+
 
 const Authors01 = () => {
     const [data] = useState(popularCollectionData);
+
+    const address = useParams()
+    const userQuery = `
+                    {
+                    user(id:"${address}"){
+                        id
+                        tokens{
+                        id
+                        tokenURI
+                        }
+                    }
+                    }
+`
+    async function getUser(){
+        const response = await client.query({query: gql(userQuery)});
+        const user = response.data.user
+        console.log(user);
+    }
 
     const [visible , setVisible] = useState(6);
     const showMoreItems = () => {
         setVisible((prevValue) => prevValue + 3);
     }
+    useEffect(()=>{
+        getUser()
+    },[])
     return (
         <div className='authors'>
             <Header />

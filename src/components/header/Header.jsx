@@ -9,12 +9,13 @@ import logodark2x from '../../assets/images/logo/logo_dark@2x.png'
 import imgsun from '../../assets/images/icon/sun.png'
 import avt from '../../assets/images/avatar/avt-2.jpg'
 import logo_luxurio from '../../assets/images/logo/logo_Luxurio.png'
-
+import ConnectWallet from './Connector';
 
 
 const Header = () => {
     const { pathname } = useLocation();
 
+    
     const headerRef = useRef (null)
     useEffect(() => {
         window.addEventListener('scroll', isSticky);
@@ -34,6 +35,7 @@ const Header = () => {
     const btnSearch = useRef(null)
 
     const menuToggle = () => {
+        
         menuLeft.current.classList.toggle('active');
         btnToggle.current.classList.toggle('active');
     }
@@ -46,6 +48,7 @@ const Header = () => {
     const handleOnClick = index => {
         setActiveIndex(index); 
     };
+    
 
     return (
         <header id="header_main" className="header_1 js-header" ref={headerRef}>
@@ -90,22 +93,8 @@ const Header = () => {
                                     </ul>
                                 </nav>
                                 <div className="flat-search-btn flex">
-                                    <div className="header-search flat-show-search" id="s1">
-                                        <Link to="#" className="show-search header-search-trigger" onClick={searchBtn}>
-                                            <i className="far fa-search"></i>
-                                        </Link>
-                                        <div className="top-search" ref={btnSearch}>
-                                            <form action="#" method="get" role="search" className="search-form">
-                                                <input type="search" id="s" className="search-field" placeholder="Search..." name="s" title="Search for" required="" />
-                                                <button className="search search-submit" type="submit" title="Search">
-                                                    <i className="icon-fl-search-filled"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
                                     <div className="sc-btn-top mg-r-12" id="site-header">
-                                        <Link to="/wallet-connect" className="sc-button header-slider style style-1 wallet fl-button pri-1"><span>Wallet connect
-                                        </span></Link>
+                                        <ConnectWallet className="mt-10"/>
                                     </div>
 
                                     <div className="admin_active" id="header_admin">

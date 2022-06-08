@@ -8,24 +8,33 @@ import 'react-tabs/style/react-tabs.css';
 import img1 from '../assets/images/box-item/image-box-6.jpg'
 import avt from '../assets/images/avatar/avt-9.jpg'
 import {create as ipfsHttpClient} from 'ipfs-http-client';
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { useNavigate } from "react-router-dom";
+
 
 import { ethers } from 'ethers'
 import Web3Modal from 'web3modal'
 
 
-import NFTMarket from '../NFTMarket.json';
-import {nftMarketAddress} from '../config';
+import NFTMint from '../NFTMint.json';
+import {nftMintAddress} from '../config';
+import MarketPlace from '../MarketPlace.json';
+import { marketplaceAddress } from '../config';
+
 
 import users from '../assets/fake-data/users';
 
 const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
 
 const CreateItem = () => {
-
+    
+    let navigate = useNavigate();
 const [fileUrl, setFileUrl] = useState(null);
-
-const [formInput, setFormInput] = useState({price:'', name: '', description:''});
-const [formInput2, setFormInput2] = useState({name:'', minimumBid:'', duration:''});
+const [directBuyData,setDirectBuyData] = useState();
+const [auctionData, setAuctionData]= useState();
+const [formInput, setFormInput] = useState({price:'', name: '', description:'', collection:''});
+const [formInput2, setFormInput2] = useState({name:'', minimumBid:'', duration:'', collection:''});
 const [previewStateFixedPice, setPreviewState] = useState(true);
 
 const [loading, setLoading] = useState(true);
@@ -40,7 +49,7 @@ async function onChange(e) {
     const added = await client.add(file, {
       progress: (prog) => console.log(`received: ${prog}`),
     });
-    const url = `https://gateway.pinata.cloud/ipfs/${added.path}`;
+    const url = `https://ipfs.io/ipfs/${added.path}`;
     setFileUrl(url);
   } catch (error) {
     console.log('Error uploading file: ', error);
@@ -49,17 +58,18 @@ async function onChange(e) {
 }
 
 async function uploadToIPFS() {
-  const { name, description} = formInput;
+  const { name, description, collection} = formInput;
   if (!name || !description || !fileUrl) return;
   /* first, upload to IPFS */
   const data = JSON.stringify({
     name,
     description,
     image: fileUrl,
+    collection
   });
   try {
     const added = await client.add(data);
-    const url = `https://ipfs.infura.io/ipfs/${added.path}`;
+    const url = `https://ipfs.io/ipfs/${added.path}`;
     /* after file is uploaded to IPFS, return the URL to use it in the transaction */
     return url;
   } catch (error) {
@@ -67,17 +77,18 @@ async function uploadToIPFS() {
   }
 }
 async function uploadToIPFS2() {
-  const { name, description } = formInput2;
+  const { name, description, collection } = formInput2;
   if (!name || !description || !fileUrl) return;
   /* first, upload to IPFS */
   const data = JSON.stringify({
     name,
     description,
     image: fileUrl,
+    collection
   });
   try {
     const added = await client.add(data);
-    const url = `https://ipfs.infura.io/ipfs/${added.path}`;
+    const url = `https://ipfs.io/ipfs/${added.path}`;
     /* after file is uploaded to IPFS, return the URL to use it in the transaction */
     return url;
   } catch (error) {
@@ -85,21 +96,21 @@ async function uploadToIPFS2() {
   }
 }
 async function listNFTForDirectSale() {
-  const url = await uploadToIPFS();
+  try {
+      const url = await uploadToIPFS();
   
   const web3Modal = new Web3Modal();
   const connection = await web3Modal.connect();
   const provider = new ethers.providers.Web3Provider(connection);
   const signer = provider.getSigner();
   /* next, create the item */
-  const price = ethers.utils.parseUnits(formInput.price, 'ether');
-  let contract = new ethers.Contract(
-    nftMarketAddress,
-    NFTMarket.abi,
+  let mint = new ethers.Contract(
+      nftMintAddress,
+    NFTMint.abi,
     signer
   );
 
-  let transaction = await contract.mintToken(url);
+  let transaction = await mint.mint(url);
   let tx = await transaction.wait();
 
   let eventVal = tx.events.find(event => event.event === "Transfer").args.tokenId;
@@ -107,68 +118,112 @@ async function listNFTForDirectSale() {
   
   let tokenId = Number(eventVal._hex);
   
+  
+  let market = new ethers.Contract(
+      marketplaceAddress,
+      MarketPlace.abi,
+      signer
 
-  let createDirectSale = await contract.createDirectSaleItem(tokenId, price);
+      )
+      const price = ethers.utils.parseUnits(directBuyData.price, 'ether');
+
+  let createDirectSale = await market.createDirectSaleItem(tokenId, price);
   await createDirectSale.wait();
+  notify()
+
+  setTimeout(() => {
+      navigate("/");
+  }, 5000);
+  } catch (error) {
+      console.log(error);
+  }
   
 }
 async function listNFTForAuction(){
 
-    const url = await uploadToIPFS2();
+    try {
+        const url = await uploadToIPFS2();
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
     const signer = provider.getSigner();
-  /* next, create the item */
-  const price = ethers.utils.parseUnits(formInput.price, 'ether');
-  let contract = new ethers.Contract(
-    nftMarketAddress,
-    NFTMarket.abi,
-    signer
-  );
+    
+    // console.log('clean initial code')
 
-  let transaction = await contract.mintToken(url);
-  let tx = await transaction.wait();
-  const duration = formInput2.duration*24*60*60;
-  let eventVal = tx.events.find(event => event.event === "Transfer").args.tokenId;
-  let tokenId = Number(eventVal._hex);
-
-  let createAuctionItem = await contract.createAuction(tokenId, price, duration);
-  await createAuctionItem.wait();
-
-  
+    const address = signer.getAddress();
+    
+    const startTime = new Date().getTime();
+    // console.log('clean getting address and startime')
+    
+    
+    
+    let mint = new ethers.Contract(
+        nftMintAddress,
+        NFTMint.abi,
+        signer
+        );
+        
+        let transaction = await mint.mint(url);
+        let tx = await transaction.wait();
+        
+        let eventVal = tx.events.find(event => event.event === "Transfer").args.tokenId;
+        
+        
+        let tokenId = Number(eventVal._hex);
+        
+        let market = new ethers.Contract(
+            marketplaceAddress,
+            MarketPlace.abi,
+            signer            
+            )
+            console.log(formInput2.minimumBid)
+            console.log(auctionData)
+            
+            const minimumBid = ethers.utils.parseUnits(auctionData.minimumBid, 'ether');
+            
+            const duration = auctionData.duration*86400;  
+    
+    let createAuctionItem = await market.createAuction(nftMintAddress,tokenId, duration,minimumBid, address, startTime);
+    await createAuctionItem.wait();
+    notify()
+    setTimeout(() => {
+      navigate("/");
+  }, 5000);
+    } catch (error) {
+       console.log(error) 
+    }
+}
+const notify = ()=>{
+    toast.success('Success',{position: toast.POSITION.BOTTOM_RIGHT});
 }
 
 const handleSubmitTab1 = async (e) =>{
 e.preventDefault();
-listNFTForDirectSale();
+await listNFTForDirectSale();
 
 }
 const handleSubmitTab2 = async (e) =>{
     e.preventDefault();
-    listNFTForAuction();
+    
+    await listNFTForAuction();
+    
     // console.log(formInput2.duration*24*60*60);
-    console.log('success');
+    
     
 }
 useEffect(()=>{
-    async function getUser(){
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    const signer = provider.getSigner();
-    const userAddress = await signer.getAddress(); 
-    const user = users.filter((user)=>user.address===userAddress);
-    setUser(user[0])
+    setLoading(true)    
+    setUser(users[0])
     setLoading(false);
-    console.log(userAddress);
-    console.log(user);
-}
-
-    getUser();
-
-
+    
 },[])
+useEffect(()=>{
+
+setDirectBuyData({...formInput});
+
+setAuctionData({...formInput2});
+
+},[formInput, formInput2])
 
     return (
         <div className='create-item'>
@@ -205,7 +260,7 @@ useEffect(()=>{
                                     {formInput2.duration && 
                                     <div className="featured-countdown">
                                         <span className="slogan"></span>
-                                         <Countdown date={Date.now() + (formInput2.duration*24*60*60)}>
+                                         <Countdown date={Date.now() + (formInput2.duration*86400000)}>
                                             <span>You are good to go!</span>
                                         </Countdown>
                                     </div>
@@ -282,6 +337,9 @@ useEffect(()=>{
 
                                                 <h4 className="title-create-item">Description</h4>
                                                 <textarea placeholder="e.g. “This is very limited item”" onChange={(e)=>{setFormInput({...formInput, description: e.target.value})}}></textarea>
+                                                <h4 className="title-create-item">Collection</h4>
+                                                <textarea placeholder="e.g. “King collection”" onChange={(e)=>{setFormInput({...formInput, collection: e.target.value})}}></textarea>
+                                                
 
                                                 
                                                 <button className="mt-12" type='submit'>Create Item</button>
@@ -290,19 +348,22 @@ useEffect(()=>{
                                         <TabPanel>
                                             <form onSubmit={handleSubmitTab2}>
                                                 <h4 className="title-create-item">Minimum bid</h4>
-                                                <input type="text" placeholder="enter minimum bid" onChange={e=>setFormInput2({...formInput2, minimumBid: e.target.value})} />
-                                                <div >
-                                                    <div className="col">
+                                                <input type="text" placeholder="enter minimum bid" onChange={async (e)=>setFormInput2({...formInput2, minimumBid: e.target.value})} />
+                                                <div className="row">
+                                                    
+                                                    <div className="col-md-6">
                                                         <h5 className="title-create-item">Duration</h5>
-                                                        <input type="number" name="duration" id="duration" className="form-control" min="1" onChange={e=>setFormInput2({...formInput2, duration: e.target.value})}/>
+                                                        <input type="number" placeholder='Duration in days' name="duration" id="duration" className="form-control" min="1" onChange={e=>setFormInput2({...formInput2, duration: e.target.value})}/>
                                                     </div>                            
                                                 </div>
 
                                                 <h4 className="title-create-item">Title</h4>
                                                 <input type="text" placeholder="Item Name" onChange={e=>setFormInput2({...formInput2, name: e.target.value})}/>
 
+                                                <h4 className="title-create-item">Collection</h4>
+                                                <input placeholder="e.g. “King collection”" onChange={(e)=>{setFormInput2({...formInput2, collection: e.target.value})}}></input>
                                                 <h4 className="title-create-item">Description</h4>
-                                                <textarea placeholder="e.g. “This is very limited item”" onChange={e=>setFormInput2({...formInput2, description: e.target.value})}></textarea>
+                                                <textarea placeholder="e.g. “This is very limited item”" onChange={e=>setFormInput2({...formInput2, description: e.target.value})} maxLength={500}></textarea>
                                             <button className="mt-12" type='submit'>Create Item</button>
                                             </form>
                                         </TabPanel>
@@ -314,6 +375,7 @@ useEffect(()=>{
                     </div>
                 </div>
             </div>
+            <ToastContainer/>
             <Footer />
         </div>
     );

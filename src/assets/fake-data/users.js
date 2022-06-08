@@ -1,6 +1,6 @@
 const users = [
   {
-    address: '0xE98dAa56cEA0Ed398993EdadF2FF60607cD28aaA',
+    address: '0xe98daa56cea0ed398993edadf2ff60607cd28aaa',
     name: 'vromean',
     avatar: 'https://cryptocoven.s3.amazonaws.com/nyx.png',
   },

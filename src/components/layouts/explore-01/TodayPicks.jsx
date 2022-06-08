@@ -75,12 +75,12 @@ const TodayPicks = props => {
                                 <div key={index} className="fl-item col-xl-3 col-lg-4 col-md-6 col-sm-6">
                                     <div className={`sc-card-product ${item.feature ? 'comingsoon' : '' } `}>
                                         <div className="card-media">
-                                            <Link to="/item-details-01"><img src={item.img} alt="axies" /></Link>
-                                            <Link to="/login" className="wishlist-button heart"><span className="number-like">{item.wishlist}</span></Link>
+                                            <Link to={`/item-details-02/${item.tokenId}`}><img src={item.img} alt="axies" /></Link>
+                                            {/* <Link to="/login" className="wishlist-button heart"><span className="number-like">{item.wishlist}</span></Link> */}
                                             <div className="coming-soon">{item.feature}</div>
                                         </div>
                                         <div className="card-title">
-                                            <h5 className="style2"><Link to="/item-details-01">"{item.title}"</Link></h5>
+                                            <h5 className="style2"><Link to={`/item-details-02/${item.tokenId}`}>{item.title}</Link></h5>
                                             <div className="tags">{item.tags}</div>
                                         </div>
                                         <div className="meta-info">
@@ -93,13 +93,28 @@ const TodayPicks = props => {
                                                     <h6> <Link to="/authors-02">{item.nameAuthor}</Link> </h6>
                                                 </div>
                                             </div>
-                                            <div className="price">
+                                            {item.onAuction && <div className="price">
                                                 <span>Current Bid</span>
                                                 <h5> {item.price}</h5>
+                                            </div>}
+                                            {
+                                                item.onDirectSale && <div className="price">
+                                                <span>Price</span>
+                                                <h5> {item.price}</h5>
+                                            </div>                                            
+                                            }
+                                            {
+                                                item.onAuction || item.onDirectSale || <div className="price">
+                                                <span>Not On Sale</span>
+                                                <h5>{item.price}</h5>
                                             </div>
+                                                
+                                            }
+                                           
                                         </div>
                                         <div className="card-bottom">
-                                            <button onClick={() => setModalShow(true)} className="sc-button style bag fl-button pri-3 no-bg"><span>Place Bid</span></button>
+                                            {item.onAuction && <button onClick={() => setModalShow(true)} className="sc-button style bag fl-button pri-3 no-bg"><span>Place Bid</span></button>}
+                                            {item.onDirectSale && <button onClick={() => setModalShow(true)} className="sc-button style bag fl-button pri-3 no-bg"><span>Buy Now</span></button>}
                                             <Link to="/activity-01" className="view-history reload">View History</Link>
                                         </div>
                                     </div>

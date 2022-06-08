@@ -5,6 +5,7 @@ import todayPickData from '../../../assets/fake-data/data-today-pick';
 
 const Explore = props => {
     const data = props.data;
+    const auctionData = props.auctionData;
     return (
         <section className="tf-explore tf-section">
             <div className="themesflat-container">
@@ -37,7 +38,7 @@ const Explore = props => {
                     </div>
                     
                     <div className="col-xl-9 col-lg-9 col-md-12">
-                        <ExploreItem data={todayPickData} />
+                        <ExploreItem data={auctionData} />
                     </div>
                 </div>
             </div>

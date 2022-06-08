@@ -1,4 +1,4 @@
-import React , { useState , Fragment } from 'react';
+import React , { useState , Fragment,useEffect } from 'react';
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -11,7 +11,14 @@ import 'swiper/scss/navigation';
 import 'swiper/scss/pagination';
 
 const LiveAuction = props => {
-    const data = props.data;
+
+    let data = props.data.filter(data=> data.onAuction===true);
+    console.log(data)
+   
+    data = data.filter(data=>(Date.now()/1000)<Number(data.auctionEndAt));
+    
+    data = data.filter(data=>Number(data.auctionEndAt)<864001);
+    
     
 
     const [modalShow, setModalShow] = useState(false);
@@ -65,8 +72,8 @@ const LiveAuction = props => {
                                                                             {/* <Link to="/login" className="wishlist-button heart"><span className="number-like">{item.wishlist}</span></Link> */}
                                                                             <div className="featured-countdown">
                                                                                 <span className="slogan"></span>
-                                                                                <Countdown date={Date.now() + 500000000}>
-                                                                                    <span>You are good to go!</span>
+                                                                                <Countdown date={Math.floor(Number(item.auctionEndAt)-(Date.now()/1000))}>
+                                                                                    <span>Auction Ended</span>
                                                                                 </Countdown>
                                                                             </div>
                                                                             <div className="button-place-bid">
@@ -74,7 +81,7 @@ const LiveAuction = props => {
                                                                             </div>
                                                                         </div>
                                                                         <div className="card-title">
-                                                                            <h5><Link to={`/item-details-02/${item.tokenId}`}>"{item.title}"</Link></h5>
+                                                                            <h5><Link to={`/item-details-02/${item.tokenId}`}>{item.title}</Link></h5>
                                                                         </div>
                                                                         <div className="meta-info">
                                                                             <div className="author">
@@ -82,14 +89,14 @@ const LiveAuction = props => {
                                                                                     <img src={item.imgAuthor} alt="axies" />
                                                                                 </div>
                                                                                 <div className="info">
-                                                                                    <span>Creator</span>
-                                                                                    <h6> <Link to="/authors-02">{item.nameAuthor}
+                                                                                    <span>Seller</span>
+                                                                                    <h6> <Link to="/authors-02/">{item.nameAuthor}
                                                                                     </Link> </h6>
                                                                                 </div>
                                                                             </div>
                                                                             <div className="price">
                                                                                 <span>Current Bid</span>
-                                                                                <h5> {item.price}</h5>
+                                                                                <h5> {item.price} ETH</h5>
                                                                             </div>
                                                                         </div>
                                                                     </div>    	

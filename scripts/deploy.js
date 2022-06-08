@@ -1,25 +1,34 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
 const hre = require('hardhat');
+const fs = require('fs');
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+  const Auction = await hre.ethers.getContractFactory('ReserveAuction');
+  const auction = await Auction.deploy();
 
-  // We get the contract to deploy
-  const NFTMarket = await hre.ethers.getContractFactory('NFTMarket');
-  const nftMarket = await NFTMarket.deploy();
+  await auction.deployed();
 
-  await nftMarket.deployed();
+  const Marketplace = await hre.ethers.getContractFactory('MarketPlace');
 
-  console.log('NFT market deployed to:', nftMarket.address);
+  const marketplace = await Marketplace.deploy(auction.address);
+
+  await marketplace.deployed();
+
+  const NFTMint = await hre.ethers.getContractFactory('NFTMint');
+
+  const nftMint = await NFTMint.deploy(marketplace.address, auction.address);
+
+  await nftMint.deployed();
+
+  fs.writeFileSync(
+    './config.js',
+    `
+  export const auctionAddress = "${auction.address}"
+  export const marketplaceAddress = "${marketplace.address}"
+  export const nftMintAddress = "${nftMint.address}"
+  `
+  );
+
+  console.log('Contracts deployed');
 }
 
 // We recommend this pattern to be able to use async/await everywhere
