@@ -18,39 +18,56 @@ import Web3Modal from 'web3modal'
 import NFTMarket from '../NFTMarket.json';
 import { nftMarketAddress } from '../config';
 import { createClient } from 'urql';
+import axios from 'axios';
+import users from '../assets/fake-data/users'
 
 const APIURL =
-    'https://api.thegraph.com/subgraphs/name/vromahya/jewelverse-api';
+  'https://api.thegraph.com/subgraphs/name/vromahya/jewelverse-api-v2';
 
 const query = `
     query  {
-            tokens(first: 5) 
-                            {
-                            id
-                            tokenId
-                            tokenURI
-                            onAuction
-                            reservedPrice
-                            owner {
+            tokens
+                    {
+                        
+                        tokenId
+                        tokenURI
+                        onAuction
+                        reservedPrice
+                        owner {
                                 id
-                            }
-                            }
+                                }
+                        creator{
+                            id
+                        }
+                        }
             }
 `;
 const client = createClient({ url: APIURL });
 
-
+async function getData(tokenId) {
+  const response = await client.query(query).toPromise();
+  const fullData = await response.data.tokens;
+  console.log('fullData',fullData)
+  console.log(tokenId)
+  const data = fullData.filter((data)=>data.tokenId===tokenId);
+  console.log('filteredData',data);
+  return data;
+}
 
 
 const ItemDetails02 = () => {
 
     const [data, setData] = useState();
 
-    const [showFormAuctionForm, setShowAuctionForm] = useState(false);
+    const [additionalData, setAdditionalData ] = useState({});
+
+    const [showAuctionForm, setShowAuctionForm] = useState(false);
 
     const [showDirectBuyForm, setShowDirectBuyForm] = useState(false);
 
     const [loading, setLoading] = useState(true);
+
+    const [userData, setUserData] = useState();
 
     // const [item, setItem] = useState({name:});
 
@@ -64,15 +81,18 @@ const ItemDetails02 = () => {
         const provider = new ethers.providers.Web3Provider(connection);
         const signer = provider.getSigner();
 
-        const value = ethers.utils.parseUnits(price, 'ether');
-        let contract = new ethers.Contract(
-            nftMarketAddress,
-            NFTMarket.abi,
-            signer
-        );
+        // const value = ethers.utils.parseUnits(additionalData.reservedPrice, 'ether');
+        const value = ethers.utils.parseUnits(price, 'wei');
+        console.log('tokenId:', tokenId)
+        console.log('price:', value)
+        // let contract = new ethers.Contract(
+        //     nftMarketAddress,
+        //     NFTMarket.abi,
+        //     signer
+        // );
 
-        const transaction = await contract.createDirectSale(tokenId, { value: value });
-        await transaction.wait();
+        // const transaction = await contract.createDirectSale(tokenId, { value: value });
+        // await transaction.wait();
 
     }
     const placeBid = async () => {
@@ -81,14 +101,17 @@ const ItemDetails02 = () => {
         const provider = new ethers.providers.Web3Provider(connection);
         const signer = provider.getSigner();
 
-        const value = ethers.utils.parseUnits(price, 'ether');
-        let contract = new ethers.Contract(
-            nftMarketAddress,
-            NFTMarket.abi,
-            signer
-        );
-        const transaction = await contract.placeBid(tokenId, { value: value });
-        await transaction.wait();
+        console.log('tokenId:', tokenId)
+        console.log(price)
+        const value = ethers.utils.parseUnits(price, 'wei');
+        console.log('price:', value)
+        // let contract = new ethers.Contract(
+        //     nftMarketAddress,
+        //     NFTMarket.abi,
+        //     signer
+        // );
+        // const transaction = await contract.placeBid(tokenId, { value: price });
+        // await transaction.wait();
     }
 
 
@@ -97,21 +120,30 @@ const ItemDetails02 = () => {
 
 
     useEffect(() => {
+        setLoading(true)
+        
         const getItem = async () => {
-            const response = await client.query(query).toPromise();
-            const fullData = response.data.tokens;
-            const data = fullData.filter(data => data.tokenId === tokenId);
-            setData(data)
-            
-            setLoading(false);
-            console.log(data);
-            
-
+            const data = await getData(tokenId)
+            const meta = await axios.get(data[0].tokenURI)
+            setData(meta.data)
+            console.log('API data',data);
+            setAdditionalData(data[0]);
+            console.log('data', additionalData)    
         }
         getItem();
+        
+        
+        const getUser = async ()=>{
+            const owner = (await users.filter(user=>user.address===additionalData.owner.id))[0]
+            const creator = (await users.filter(user=>user.address===additionalData.creator.id))[0]
+            setUserData({owner,creator})
+            console.log(userData)
+        }
+        getUser()
+        
+        setLoading(false)
 
-
-    }, [tokenId]);
+    }, []);
 
 
     const handleSubmitAuction = async (e) => {
@@ -122,7 +154,7 @@ const ItemDetails02 = () => {
     }
     const handleSubmitDirectBuy = async (e) => {
         e.preventDefault();
-        setPrice(Number(data[0].reservedPrice)/1000000000000000000);
+        // setPrice(Number(data.reservedPrice));
         await createDirectSale();
         console.log("success");
     }
@@ -163,7 +195,7 @@ const ItemDetails02 = () => {
                         <div className="col-xl-6 col-md-12">
                             <div className="content-left">
                                 <div className="media">
-                                    <img src={imgdetail1} alt="Axies" />
+                                    {loading?<img src={imgdetail1} alt="Axies" />:<img src={data.image} alt="Axies" />}
                                 </div>
                             </div>
                         </div>
@@ -172,7 +204,7 @@ const ItemDetails02 = () => {
                                 <div className="sc-item-details">
                                     <div className="meta-item">
                                         <div className="left">
-                                            <h2>“The Pretty Fantasy Flower illustration ”</h2>
+                                            {loading?<h2>loading</h2>:<h2>{data.name}</h2>}
                                         </div>
                                         <div className="right">
                                             <span className="viewed eye mg-r-8">225</span>
@@ -183,30 +215,27 @@ const ItemDetails02 = () => {
                                         <div className="meta-info">
                                             <div className="author">
                                                 <div className="avatar">
-                                                    <img src={img6} alt="Axies" />
+                                                    {loading? <img src={img6} alt="Axies" />: <img src={userData.owner.avatar} alt="Axies" />}
                                                 </div>
                                                 <div className="info">
                                                     <span>Owned By</span>
-                                                    <h6> <Link to="/author-02">Ralph Garraway</Link> </h6>
+                                                    {loading?<h6> <Link to="/author-02">Loading</Link> </h6>:<h6> <Link to="/author-02">{userData.owner.name}</Link> </h6>}
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="meta-info">
                                             <div className="author">
                                                 <div className="avatar">
-                                                    <img src={img7} alt="Axies" />
+                                                    {loading?<img src={img7} alt="Axies" />:<img src={userData.creator.avatar} alt="Axies" />}
                                                 </div>
                                                 <div className="info">
-                                                    <span>Create By</span>
-                                                    <h6> <Link to="/author-02">Freddie Carpenter</Link> </h6>
+                                                    <span>Created By</span>
+                                                    {loading?<h6> <Link to="/author-02">loading</Link> </h6>:<h6> <Link to="/author-02">{userData.creator.name}</Link> </h6>}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <p>Habitant sollicitudin faucibus cursus lectus pulvinar dolor non ultrices eget.
-                                        Facilisi lobortisal morbi fringilla urna amet sed ipsum vitae ipsum malesuada.
-                                        Habitant sollicitudin faucibus cursus lectus pulvinar dolor non ultrices eget.
-                                        Facilisi lobortisal morbi fringilla urna amet sed ipsum</p>
+                                    {loading? <p>loading</p>:<p>{data.description}</p>}
                                     <div className="meta-item-details">
                                         <div className="item-style-2 item-details">
                                             <ul className="list-details">
@@ -219,12 +248,12 @@ const ItemDetails02 = () => {
                                         <div className="item-style-2">
                                             <div className="item meta-price">
                                                 {
-                                                    loading? <p>loading</p>:data[0].onAuction? <span className="heading">Minimum Bid</span>:<span className="heading">Price</span>
+                                                    loading? <p>loading</p>:additionalData.onAuction? <span className="heading">Minimum Bid</span>:<span className="heading">Price</span>
                                                 }
                                                 <div className="price">
                                                     <div className="price-box">
                                                         {
-                                                            loading? <h5>loading</h5>:<h5> {Number(data[0].reservedPrice)/1000000000000000000}</h5>
+                                                            loading? <h5>loading</h5>:<h5> {Number(additionalData.reservedPrice)/1000000000000000000} ETH</h5>
                                                         }
                                                         <span>= $12.246</span>
                                                     </div>
@@ -237,15 +266,15 @@ const ItemDetails02 = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    {/* <button onClick={placeBid} className="sc-button loadmore style bag fl-button pri-3"><span>Place a bid</span></button> */}
+                                    {/* <button onClick={placeBid} className="sc-button loadmore style bag fl-button pri-3"><span>Place a bid</span></button>  */}
                                     {
-                                        loading?<h5>loading</h5>:data[0].onAuction? <button onClick={()=>setShowAuctionForm(true)} className="sc-button loadmore style bag fl-button pri-3"><span>Place a bid</span></button>:<button onClick={()=>{setShowDirectBuyForm(true)}} className="sc-button loadmore style bag fl-button pri-3"><span>Buy Now</span></button>
+                                        loading?<h5>loading</h5>:additionalData.onAuction? <button onClick={()=>setShowAuctionForm(!showAuctionForm)} className="sc-button loadmore style bag fl-button pri-3"><span>Place a bid</span></button>:<button onClick={()=>{setShowDirectBuyForm(!showDirectBuyForm)}} className="sc-button loadmore style bag fl-button pri-3"><span>Buy Now</span></button>
                                     }
                                     {
-                                        showFormAuctionForm && <form onSubmit={handleSubmitAuction}>
-                                            <h1 className="title-create-item">Minimum bid</h1>
+                                        showAuctionForm && <form onSubmit={handleSubmitAuction}>
+                                            <h5 className="title-create-item">Minimum bid</h5>
                                             <input type="text" placeholder="enter bid amount" onChange={e => setPrice(e.target.value)} />
-                                            <button className="sc-button loadmore style bag fl-button pri-3" type='submit'>Place Bid</button>
+                                            <button className="sc-button loadmore style bag fl-button pri-3 mt-3" type='submit'>Place Bid</button>
                                         </form>
                                     }
                                     {
@@ -335,7 +364,7 @@ const ItemDetails02 = () => {
                     </div>
                 </div>
             </div>
-            <LiveAuction data={liveAuctionData} />
+            {/* <LiveAuction data={liveAuctionData} /> */}
             <Footer />
         </div>
     );
