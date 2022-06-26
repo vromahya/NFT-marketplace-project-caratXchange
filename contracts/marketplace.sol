@@ -12,6 +12,8 @@ contract MarketPlace is ReentrancyGuard {
 
     address admin;
 
+    uint256 listingFee = 1 ether;
+
     event DirectSaleCreated(uint256 indexed tokenId, uint256 indexed price);
     event DirectSaleDone(uint256 indexed tokenId, uint256 indexed price);
     event OrderInTransit(uint256 indexed tokenId);
@@ -41,6 +43,15 @@ contract MarketPlace is ReentrancyGuard {
         tokenContract = _tokenContract;
     }
 
+    function updateListingFee(uint256 _listingFee) public {
+        require(msg.sender == admin, "ONLY_OWNER_CAN_CHANGE_LISTING_FEE");
+        listingFee = _listingFee;
+    }
+
+    function getListingFee() public view returns (uint256) {
+        return listingFee;
+    }
+
     function createAuction(
         address _tokenContract,
         uint256 _tokenId,
@@ -48,7 +59,7 @@ contract MarketPlace is ReentrancyGuard {
         uint256 _reservePrice,
         address _sellerFundsRecipient,
         uint256 _startTime
-    ) external nonReentrant {
+    ) external payable nonReentrant {
         require(
             tokenIdToMarketItemMeta[_tokenId].onDirectSale == false,
             "ITEM_ALREADY_ON_DIRECT_SALE"
@@ -57,6 +68,11 @@ contract MarketPlace is ReentrancyGuard {
             tokenIdToMarketItemMeta[_tokenId].onAuction != true,
             "AUCTION_ALREADY_EXISTS"
         );
+
+        require(msg.value == listingFee, "PROVIDE_LISTING_FEE");
+
+        payable(admin).transfer(msg.value);
+
         Iauction(auctionContract).createAuction(
             _tokenContract,
             _tokenId,
@@ -75,6 +91,7 @@ contract MarketPlace is ReentrancyGuard {
 
     function createDirectSaleItem(uint256 _tokenId, uint256 _reservePrice)
         external
+        payable
         nonReentrant
     {
         require(
@@ -86,6 +103,10 @@ contract MarketPlace is ReentrancyGuard {
             IERC721(tokenContract).ownerOf(_tokenId) == msg.sender,
             "ONLY_OWNER_CAN_PUT_ITEMS_ON_SALE"
         );
+
+        require(msg.value == listingFee);
+
+        payable(admin).transfer(msg.value);
 
         tokenIdToMarketItemMeta[_tokenId].seller = IERC721(tokenContract)
             .ownerOf(_tokenId);
@@ -132,16 +153,21 @@ contract MarketPlace is ReentrancyGuard {
     }
 
     function settleDirectSale(uint256 _tokenId) external payable nonReentrant {
-        
+        uint256 price = tokenIdToMarketItemMeta[_tokenId].reservePrice;
+
+        address seller = tokenIdToMarketItemMeta[_tokenId].seller;
+
+        require(msg.sender != seller, "SELLER_CANNOT_BUY");
+
+        require(msg.value >= price, "INSUFFICIENT_ETHER_SENT");
+
         tokenIdToMarketItemMeta[_tokenId].onAuction = false;
         tokenIdToMarketItemMeta[_tokenId].onDirectSale = false;
         tokenIdToMarketItemMeta[_tokenId].orderState.started = true;
-        
-        address seller = tokenIdToMarketItemMeta[_tokenId].seller;
 
         payable(seller).transfer(msg.value);
 
-        IERC721(tokenContract).transferFrom(seller, msg.sender, _tokenId);
+        IERC721(tokenContract).safeTransferFrom(seller, msg.sender, _tokenId);
 
         emit DirectSaleDone(_tokenId, msg.value);
     }
@@ -160,7 +186,6 @@ contract MarketPlace is ReentrancyGuard {
         tokenIdToMarketItemMeta[_tokenId].orderState.inTransit = false;
         tokenIdToMarketItemMeta[_tokenId].orderState.completed = true;
 
-        Iauction(auctionContract).releaseFunds(_tokenId);
         emit OrderCompleted(_tokenId);
     }
 

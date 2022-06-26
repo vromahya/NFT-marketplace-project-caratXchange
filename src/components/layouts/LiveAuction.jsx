@@ -14,8 +14,9 @@ const LiveAuction = props => {
 
     let data = props.data.filter(data=> data.onAuction===true);
     
-    
+    // console.log(data)
     data = data.filter(data=>(Date.now()/1000)<Number(data.auctionEndAt));
+    
       
     
 
@@ -30,7 +31,7 @@ const LiveAuction = props => {
                             <div className="heading-live-auctions">
                                 <h2 className="tf-title pb-20">
                                     Live Auctions</h2>
-                                <Link to="/explore-03" className="exp style2">EXPLORE MORE</Link>
+                                <Link to="/explore" className="exp style2">EXPLORE MORE</Link>
                             </div>
                         </div>
                         <div className="col-md-12">
@@ -66,20 +67,18 @@ const LiveAuction = props => {
                                                                 <div className="slider-item">										
                                                                     <div className="sc-card-product">
                                                                         <div className="card-media">                                                                            
-                                                                            <Link to={`/item-details-02/${item.tokenId}`}><img src={item.img} alt="axies" /></Link>
+                                                                            <Link to={`/item-details/${item.tokenId}`}><img src={item.img} alt="axies" /></Link>
                                                                             {/* <Link to="/login" className="wishlist-button heart"><span className="number-like">{item.wishlist}</span></Link> */}
                                                                             <div className="featured-countdown">
                                                                                 <span className="slogan"></span>
-                                                                                <Countdown date={Math.floor(Number(item.auctionEndAt)-(Date.now()/1000))}>
+                                                                                <Countdown date={item.auctionEndAt*1000}>
                                                                                     <span>Auction Ended</span>
                                                                                 </Countdown>
                                                                             </div>
-                                                                            <div className="button-place-bid">
-                                                                                <button onClick={() => setModalShow(true)} className="sc-button style-place-bid style bag fl-button pri-3"><span>Place Bid</span></button>
-                                                                            </div>
+                                                                            
                                                                         </div>
                                                                         <div className="card-title">
-                                                                            <h5><Link to={`/item-details-02/${item.tokenId}`}>{item.title}</Link></h5>
+                                                                            <h5><Link to={`/item-details/${item.tokenId}`}>{item.title}</Link></h5>
                                                                         </div>
                                                                         <div className="meta-info">
                                                                             <div className="author">
@@ -88,7 +87,7 @@ const LiveAuction = props => {
                                                                                 </div>
                                                                                 <div className="info">
                                                                                     <span>Seller</span>
-                                                                                    <h6> <Link to="/authors-02/">{item.nameAuthor}
+                                                                                    <h6> <Link to={`/authors/${item.owner}`}>{item.nameAuthor}
                                                                                     </Link> </h6>
                                                                                 </div>
                                                                             </div>

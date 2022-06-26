@@ -1,14 +1,11 @@
-const users = [
+const sellers = [
   {
     address: '0xe98daa56cea0ed398993edadf2ff60607cd28aaa',
-    name: 'vromean',
     seller: 'true',
-    avatar: 'https://cryptocoven.s3.amazonaws.com/nyx.png',
   },
   {
     address: '0x5BBCA35933aDe0A51B27954e10174cF5c38F72eF',
-    name: 'John Smith',
-    avatar: 'https://cryptocoven.s3.amazonaws.com/aletheia.png',
+    seller: 'true',
   },
   {
     address: '0x91249b6196Cd35343bd4B9fd0394dEF2b694833e',
@@ -26,5 +23,4 @@ const users = [
     avatar: '',
   },
 ];
-
-module.exports = users;
+module.exports = sellers;

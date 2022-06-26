@@ -11,6 +11,7 @@ import {create as ipfsHttpClient} from 'ipfs-http-client';
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { useNavigate } from "react-router-dom";
+// import {sellers} from '../assets/fake-data/sellers'
 
 
 import { ethers } from 'ethers'
@@ -30,6 +31,7 @@ const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
 const CreateItem = () => {
     
     let navigate = useNavigate();
+
 const [fileUrl, setFileUrl] = useState(null);
 const [directBuyData,setDirectBuyData] = useState();
 const [auctionData, setAuctionData]= useState();
@@ -52,7 +54,7 @@ async function onChange(e) {
     const url = `https://ipfs.io/ipfs/${added.path}`;
     setFileUrl(url);
   } catch (error) {
-    console.log('Error uploading file: ', error);
+    errorNotification('Error uploading file: ', error);
   }
 //   console.log(`File url: ${fileUrl}`);
 }
@@ -69,11 +71,11 @@ async function uploadToIPFS() {
   });
   try {
     const added = await client.add(data);
-    const url = `https://ipfs.io/ipfs/${added.path}`;
+    const hash = added.path;
     /* after file is uploaded to IPFS, return the URL to use it in the transaction */
-    return url;
+    return hash;
   } catch (error) {
-    console.log('Error uploading file: ', error);
+    errorNotification('Error uploading meta file:', error);
   }
 }
 async function uploadToIPFS2() {
@@ -88,16 +90,16 @@ async function uploadToIPFS2() {
   });
   try {
     const added = await client.add(data);
-    const url = `https://ipfs.io/ipfs/${added.path}`;
+    const hash = added.path;
     /* after file is uploaded to IPFS, return the URL to use it in the transaction */
-    return url;
+    return hash;
   } catch (error) {
-    console.log('Error uploading file: ', error);
+    errorNotification('Error uploading meta file:', error);
   }
 }
 async function listNFTForDirectSale() {
   try {
-      const url = await uploadToIPFS();
+      const hash = await uploadToIPFS();
   
   const web3Modal = new Web3Modal();
   const connection = await web3Modal.connect();
@@ -110,8 +112,8 @@ async function listNFTForDirectSale() {
     signer
   );
 
-  let transaction = await mint.mint(url);
-  let tx = await transaction.wait();
+    let transaction = await mint.mint(hash);
+    let tx = await transaction.wait();
     
     let eventVal = await tx.events.find(event => event.event === "Transfer").args.tokenId;
     
@@ -124,11 +126,12 @@ async function listNFTForDirectSale() {
       marketplaceAddress,
       MarketPlace.abi,
       signer
-
       )
+      let listingPrice = await market.getListingFee();
+            listingPrice = listingPrice.toString();
       const price = ethers.utils.parseUnits(directBuyData.price, 'ether');
 
-    let createDirectSale = await market.createDirectSaleItem(tokenId, price);
+    let createDirectSale = await market.createDirectSaleItem(tokenId, price, {value:listingPrice});
     await createDirectSale.wait();
     notify()
 
@@ -136,14 +139,20 @@ async function listNFTForDirectSale() {
         navigate("/");
     }, 5000);
     } catch (error) {
-        console.log(error);
+        let e = error.error.data.message;
+        
+        if(e==='execution reverted: ER_CODE_1'){
+            toast.error(`Only seller can create item`,{position: toast.POSITION.BOTTOM_RIGHT} )
+            return;
+        }
+        errorNotification('Error in putting item on sale',error);
     }
     
 }
 async function listNFTForAuction(){
 
     try {
-        const url = await uploadToIPFS2();
+        const hash = await uploadToIPFS2();
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
@@ -153,9 +162,8 @@ async function listNFTForAuction(){
 
     const address = signer.getAddress();
     
-    const startTime = Date.now()/1000;
+    const startTime = Math.floor(Date.now()/1000);
     // console.log('clean getting address and startime')
-    
     
     
     let mint = new ethers.Contract(
@@ -164,7 +172,7 @@ async function listNFTForAuction(){
         signer
         );
         
-        let transaction = await mint.mint(url);
+        let transaction = await mint.mint(hash);
         let tx = await transaction.wait();
         
         console.log(tx.events)
@@ -179,26 +187,37 @@ async function listNFTForAuction(){
             MarketPlace.abi,
             signer            
             )
-            console.log(formInput2.minimumBid)
-            console.log(auctionData)
-            
             const minimumBid = ethers.utils.parseUnits(auctionData.minimumBid, 'ether');
+            let listingPrice = await market.getListingFee();
+            listingPrice = listingPrice.toString();
+            // listingPrice = ethers.utils.parseUnits(listingPrice, 'ether');
             
             const duration = auctionData.duration*86400;  
     
-    let createAuctionItem = await market.createAuction(nftMintAddress,tokenId, duration,minimumBid, address, startTime);
+    let createAuctionItem = await market.createAuction(nftMintAddress,tokenId, duration, minimumBid, address, startTime, {value: listingPrice});
     await createAuctionItem.wait();
     notify()
     setTimeout(() => {
       navigate("/");
   }, 5000);
     } catch (error) {
-       console.log(error) 
+        let e = error.data.message;
+        if(e==='execution reverted: ER_CODE_1'){
+            toast.error(`Only seller can create item`,{position: toast.POSITION.BOTTOM_RIGHT} )
+            return;
+        }
+        console.log(error)
+       errorNotification('Error in putting item on auction',error.message); 
     }
 }
 const notify = ()=>{
     toast.success('Success',{position: toast.POSITION.BOTTOM_RIGHT});
 }
+const errorNotification = (errorIn,e)=>{
+    toast.error(`${errorIn}: ${e}`,{position: toast.POSITION.BOTTOM_RIGHT})
+}
+
+
 
 const handleSubmitTab1 = async (e) =>{
 e.preventDefault();
@@ -210,16 +229,19 @@ const handleSubmitTab2 = async (e) =>{
     
     await listNFTForAuction();
     
-    // console.log(formInput2.duration*24*60*60);
+   
     
     
 }
 useEffect(()=>{
+    
     setLoading(true)    
     setUser(users[0])
     setLoading(false);
     
+    
 },[])
+
 useEffect(()=>{
 
 setDirectBuyData({...formInput});
@@ -285,7 +307,7 @@ setAuctionData({...formInput2});
                                         <div className="info">
                                             <span>Owned By</span>
                                             {
-                                                loading?<h6> <Link to="/author-02">Freddie Carpenter</Link></h6>:<h6> <Link to="/author-02">{user.name}</Link></h6>
+                                                loading?<h6> Freddie Carpenter</h6>:<h6> {user.name}</h6>
                                             }
                                         </div>
                                     </div>
@@ -338,20 +360,20 @@ setAuctionData({...formInput2});
                                                 <h4 className="title-create-item">Title</h4>
                                                 <input type="text" placeholder="Item Name" onChange={(e)=>{setFormInput({...formInput, name: e.target.value})}} />
 
+                                                <h4 className="title-create-item">Collection <span className='text-muted' >(Optional)</span> </h4>
+                                                <input type='text' placeholder="e.g. “King collection”" onChange={(e)=>{setFormInput({...formInput, collection: e.target.value})}}></input>
                                                 <h4 className="title-create-item">Description</h4>
                                                 <textarea placeholder="e.g. “This is very limited item”" onChange={(e)=>{setFormInput({...formInput, description: e.target.value})}}></textarea>
-                                                <h4 className="title-create-item">Collection</h4>
-                                                <textarea placeholder="e.g. “King collection”" onChange={(e)=>{setFormInput({...formInput, collection: e.target.value})}}></textarea>
                                                 
 
                                                 
-                                                <button className="mt-12" type='submit'>Create Item</button>
+                                                <button className="mt-12" type='submit' >Create Item</button>
                                             </form>
                                         </TabPanel>
                                         <TabPanel>
                                             <form onSubmit={handleSubmitTab2}>
                                                 <h4 className="title-create-item">Minimum bid</h4>
-                                                <input type="text" placeholder="enter minimum bid" onChange={async (e)=>setFormInput2({...formInput2, minimumBid: e.target.value})} />
+                                                <input type="text" placeholder="enter minimum bid" onChange={(e)=>setFormInput2({...formInput2, minimumBid: e.target.value})} />
                                                 <div className="row">
                                                     
                                                     <div className="col-md-6">
@@ -367,7 +389,7 @@ setAuctionData({...formInput2});
                                                 <input placeholder="e.g. “King collection”" onChange={(e)=>{setFormInput2({...formInput2, collection: e.target.value})}}></input>
                                                 <h4 className="title-create-item">Description</h4>
                                                 <textarea placeholder="e.g. “This is very limited item”" onChange={e=>setFormInput2({...formInput2, description: e.target.value})} maxLength={500}></textarea>
-                                            <button className="mt-12" type='submit'>Create Item</button>
+                                            <button className="mt-12" type='submit' >Create Item</button>
                                             </form>
                                         </TabPanel>
                                         

@@ -42,108 +42,116 @@ const client = new ApolloClient({
 
 
 
-const Explore04 = () => {
+const ExplorePage = () => {
 
 const [auctionData, setAuctionData] = useState([])
-
-const [status, setStatus] = useState('All');
-const [orderBy, setOrderBy] = useState('createdAtTimeStamp');
-const [orderDirection, setOrderDirection] = useState('desc');
+const [Checked, setChecked] = useState([[0,0],[1,0],[2,0]]);
 
 
 
-const handleChange= (e)=>{
-    console.log(e.target.value);
-    if(e.target.value==='All') setStatus('All');
-    if(e.target.value==='onAuction') setStatus('onAuction')
-    if(e.target.value==='onDirectSale') setStatus('onDirectSale')
-    if(e.target.value==='Time created') setOrderBy('createdAtTimestamp')
-    if(e.target.value==='tokenId') setOrderBy('tokenId')
-    if(e.target.value==='price') setOrderBy('price')
-    if(e.target.value==='Ascending') setOrderDirection('asc')
-    if(e.target.value==='Descending') setOrderDirection('desc')
 
+const handleChecked = (f,g)=>{
+    
+    return Checked[f].indexOf(g,1)===-1?false:true
+
+    // if(current===-1) return false;
+    // return true;    
+}
+
+const handleChange= (f,g)=>{
     
 
+    let current = Checked[f].indexOf(g,1);
+
+    
+    const newChecked = [...Checked];
+    
+    if(current===-1) newChecked[f][1] = g;
+    
+    setChecked(newChecked)
 }
-const sort = ()=>{
-    async function setData(){
-                const items = await getData();
-                setAuctionData(items)
-                console.log(items);
-            }
-            setData();
-            setLoading(false);
+const sort = async ()=>{
+    setLoading(true)
+    const [status, orderBy, orderDirection] = getSortVariables();
+    const items = await getData(status, orderBy, orderDirection);
+    setAuctionData(items)
+    setLoading(false)
 }
 
-const getData = async ()=>{
+const getSortVariables = ()=>{
+    
+const status = widgetSidebarData[0].content[Checked[0][1]].value;
+const orderBy = widgetSidebarData[1].content[Checked[1][1]].value;
+const orderDirection = widgetSidebarData[2].content[Checked[2][1]].value;
+
+return [status, orderBy, orderDirection] 
+    
+}
+
+
+const getData = async (status, orderBy, orderDirection)=>{
 
    const response = await client
   .query({
     query: gql(tokensQuery),
     variables: {
       first: 100,
-      orderBy: 'createdAtTimestamp',
-      orderDirection: 'desc',
+      orderBy: orderBy,
+      orderDirection: orderDirection,
     },
   });
   const fullData = response.data.tokens;
+  let data;
+  if(status==='all') data = fullData.filter(data=>data.onAuction===true||data.onDirectSale===true);
+  
+  else if(status==='onAuction') data = fullData.filter(data=>data.onAuction===true);
+  else data = fullData.filter(data=>data.onDirectSale===true);
+  
+
+  
+  
 
   
 
-    const items = await Promise.all(fullData.map(async i => {
+    const items = await Promise.all(data.map(async i => {
 
-
-      const meta = await axios.get(i.tokenURI)
-   
+      let imgAuthor, nameAuthor;
+      const meta = await axios.get(`https://ipfs.io/ipfs/${i.tokenURI}`)
+      const met = await axios.get(`https://forever-carat-api.herokuapp.com/api/v1/user/${i.owner.id}`)
+      const u = met.data.user;
+      if(u.name==='Not updated'){
+        imgAuthor = defAvatar;
+        nameAuthor = i.owner.id; 
+      }else{
+        imgAuthor = u.avatar;
+        nameAuthor = u.name;
+      }
       let price;
       if(i.reservedPrice){ price = ethers.utils.formatUnits(i.reservedPrice, 'ether')}
       else price = 'NA'
    
-      try {
-          const res = await axios.get(` https://forever-carat-api.herokuapp.com/api/v1/user/${i.owner.id}`);
-          const {name, avatar, address} = res.data;
+      
         let item = { 
         title: meta.data.name,       
         tokenId: Number(i.tokenId),
         img: meta.data.image,
         price: price,
-        imgAuthor: avatar,
-        nameAuthor: name,
+        imgAuthor: imgAuthor,
+        nameAuthor: nameAuthor,
         onAuction: i.onAuction,
         onDirectSale: i.onDirectSale,
-        collection: meta.data.collection,
-        address: address
-      }
-      return item
-      } catch (error) {
-          console.log(error)
-          
-          const name = '';
-          const avatar = defAvatar;
-          const address = i.owner.id;
-           let item = { 
-        title: meta.data.name,       
-        tokenId: Number(i.tokenId),
-        img: meta.data.image,
-        price: price,
-        imgAuthor: avatar,
-        nameAuthor: name,
-        onAuction: i.onAuction,
-        onDirectSale: i.onDirectSale,
-        collection: meta.data.collection,
-        address: address
-      }
-      return item
-      }      
+        collection: meta.data.collection            
+        }
+        return item;
     }))
 return items;
 } 
     const [loading, setLoading] = useState(true);
     useEffect(()=>{
-
+            setLoading(true)
+            const [name, orderBy, orderDirection]= getSortVariables()
             async function setData(){
-                let items = await getData();
+                let items = await getData(name, orderBy, orderDirection);
                 items = items.filter(item=>item.onAuction===true||item.onDirectSale===true);
                 setAuctionData(items)
             }
@@ -178,7 +186,7 @@ return items;
             <div className="themesflat-container">
                 <div className="row">
                     <div className="col-xl-3 col-lg-3 col-md-12">
-                        <div id="side-bar" className="side-bar style-3">
+                        {loading?<></>:<div id="side-bar" className="side-bar style-3">
                             {
                                 widgetSidebarData.map((item,index) => (
                                     <div className="widget widget-category mgbt-24 boder-bt" key={index}>
@@ -189,7 +197,7 @@ return items;
                                                         item.content.map((itemm , index) => (
                                                             <div key={index}>
                                                                 <label>{itemm.field}
-                                                                    <input type="checkbox" name ={item.name} value={itemm.field} id={itemm.field} defaultChecked={itemm.checked}  onChange={handleChange}  />
+                                                                    <input type="checkbox" name ={item.name} value={itemm.field} id={itemm.field} checked={handleChecked(item.id, itemm.index)}  onChange={()=>handleChange(item.id,itemm.index)}  />
                                                                     <span className="btn-checkbox"></span>
                                                                 </label><br/>
                                                             </div>
@@ -201,7 +209,7 @@ return items;
                                     </div>
                                 ))
                             }
-                        </div>
+                        </div>}
                             <button onClick={sort}>Sort/Filter</button>
                     </div>
                     
@@ -217,4 +225,4 @@ return items;
     );
 }
 
-export default Explore04;
+export default ExplorePage;

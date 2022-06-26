@@ -8,8 +8,6 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 contract ReserveAuction {
     uint8 constant MIN_BID_INCREMENT_PERCENTAGE = 10;
 
-    address escrow;
-
     mapping(uint256 => Auction) public auctionForNFT;
 
     struct Auction {
@@ -22,34 +20,11 @@ contract ReserveAuction {
         uint32 startTime;
         uint32 firstBidTime;
     }
-    /// @notice Emitted when an auction is created
-    /// @param tokenId The ERC-721 token id of the created auction
-    /// @param auction The metadata of the created auction
     event AuctionCreated(uint256 indexed tokenId, Auction auction);
-
-    /// @notice Emitted when a reserve price is updated
-    /// @param tokenId The ERC-721 token id of the updated auction
-    /// @param auction The metadata of the updated auction
     event AuctionReservePriceUpdated(uint256 indexed tokenId, Auction auction);
-
-    /// @notice Emitted when an auction is canceled
-    /// @param tokenId The ERC-721 token id of the canceled auction
-    /// @param auction The metadata of the canceled auction
     event AuctionCanceled(uint256 indexed tokenId, Auction auction);
-
-    /// @notice Emitted when a bid is placed
-    /// @param tokenId The ERC-721 token id of the auction
-    /// @param auction The metadata of the auction
     event AuctionBid(uint256 indexed tokenId, Auction auction);
-
-    /// @notice Emitted when an auction has ended
-    /// @param tokenId The ERC-721 token id of the auction
-    /// @param auction The metadata of the settled auction
     event AuctionEnded(uint256 indexed tokenId, Auction auction);
-
-    function setEscrowContract(address _escrow) external {
-        escrow = _escrow;
-    }
 
     function createAuction(
         address _tokenContract,
@@ -157,6 +132,7 @@ contract ReserveAuction {
         uint256 duration = auction.duration;
         uint256 startTime = auction.startTime;
 
+        require(block.timestamp < (startTime + duration), "AUCTION_OVER");
         // If this is the first bid, start the auction
         if (firstBidTime == 0) {
             // Ensure the bid meets the reserve price
@@ -167,7 +143,6 @@ contract ReserveAuction {
             // Else this is a subsequent bid, so refund the previous bidder
         } else {
             // Ensure the auction has not ended
-            require(block.timestamp < (startTime + duration), "AUCTION_OVER");
 
             // Cache the highest bid
             uint256 highestBid = auction.highestBid;
@@ -203,8 +178,6 @@ contract ReserveAuction {
         external
         payable
     {
-        // require(escrow!=address(0),"PLEASE_SET_ESCROW_ACCOUNT_FIRST");
-        // Get the auction for the specified token
         Auction memory auction = auctionForNFT[_tokenId];
 
         address seller = auction.seller;
@@ -223,30 +196,17 @@ contract ReserveAuction {
             "AUCTION_NOT_OVER"
         );
 
-        // Payout associated token royalties, if any
-        // (uint256 remainingProfit, ) = _handleRoyaltyPayout(_tokenContract, _tokenId, auction.highestBid, address(0), 300000);
-
-        // Payout the module fee, if configured by the owner
-        // remainingProfit = _handleProtocolFeePayout(remainingProfit, address(0));
-
-        // Transfer the remaining profit to the funds recipient
-        // _handleOutgoingTransfer(auction.sellerFundsRecipient, remainingProfit, address(0), 50000);
-        // payable(escrow).transfer(auction.highestBid);
-        // Transfer the NFT to the winning bidder
-        IERC721(_tokenContract).transferFrom(
+        IERC721(_tokenContract).safeTransferFrom(
             seller,
             auction.highestBidder,
             _tokenId
         );
-        
+
+        payable(auction.sellerFundsRecipient).transfer(auction.highestBid);
+
         emit AuctionEnded(_tokenId, auction);
 
         // Remove the auction from storage
-    }
-
-    function releaseFunds(uint256 _tokenId) external {
-        Auction memory auction = auctionForNFT[_tokenId];
-        payable(auction.sellerFundsRecipient).transfer(auction.highestBid);
         delete auctionForNFT[_tokenId];
     }
 

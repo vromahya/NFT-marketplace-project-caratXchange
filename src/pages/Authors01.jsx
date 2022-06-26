@@ -19,6 +19,8 @@ const client = new ApolloClient({
 
 const Authors01 = () => {
     const [data] = useState(popularCollectionData);
+    const [userData, setUserData]=useState();
+    const [loading, setLoading]= useState(true);
 
     const address = useParams()
     const userQuery = `
@@ -35,7 +37,10 @@ const Authors01 = () => {
     async function getUser(){
         const response = await client.query({query: gql(userQuery)});
         const user = response.data.user
-        console.log(user);
+        let userInfo;
+        const e = axios.get(`https://forever-carat-api.herokuapp.com/api/v1/user/${address}`)
+        console.log(e)
+        return user;
     }
 
     const [visible , setVisible] = useState(6);
@@ -43,7 +48,9 @@ const Authors01 = () => {
         setVisible((prevValue) => prevValue + 3);
     }
     useEffect(()=>{
-        getUser()
+        setLoading(true)
+        const user= getUser();
+        setUserData(user)
     },[])
     return (
         <div className='authors'>
@@ -54,13 +61,13 @@ const Authors01 = () => {
                     <div className="row">
                         <div className="col-md-12">
                             <div className="page-title-heading mg-bt-12">
-                                <h1 className="heading text-center">Authors</h1>
+                                {loading?<h1 className="heading text-center">Author</h1>:<h1 className="heading text-center">{userData.id}</h1>}
                             </div>
                             <div className="breadcrumbs style2">
                                 <ul>
                                     <li><Link to="/">Home</Link></li>
                                     <li><Link to="#">Pages</Link></li>
-                                    <li>Authors</li>
+                                    <li>Author</li>
                                 </ul>
                             </div>
                         </div>

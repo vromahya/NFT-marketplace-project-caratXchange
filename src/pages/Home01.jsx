@@ -28,6 +28,8 @@ const query = `
                     {
                         
                         tokenId
+                        name
+                        image
                         tokenURI
                         onAuction
                         onDirectSale
@@ -55,30 +57,62 @@ async function getData() {
   });
 
   const fullData = response.data.tokens;
-//   console.log(fullData)
+  
   
 
     const items = await Promise.all(fullData.map(async i => {
     //   console.log(i);
 
-      const meta = await axios.get(i.tokenURI)
+      let imgAuthor, nameAuthor;
       let price;
       if(i.reservedPrice) {price = ethers.utils.formatUnits(i.reservedPrice, 'ether')}
       else price = 'NA'
+
+      const m = await axios.get(`https://forever-carat-api.herokuapp.com/api/v1/user/${i.owner.id}`)
+
+      const u = m.data.user
       
-    //   console.log(user)
-      let item = { 
-        title: meta.data.name,       
+         imgAuthor = u.avatar;
+
+         if(u.name==='Not updated'){
+          nameAuthor=i.owner.id
+         }
+         nameAuthor = u.name;
+      
+      
+      if(i.name){
+        let item = { 
+        title: i.name,       
         tokenId: Number(i.tokenId),
-        img: meta.data.image,
+        img: i.image,
         onAuction: i.onAuction,
         onDirectSale: i.onDirectSale,
         price: price,
-        imgAuthor: defAvatar,
-        nameAuthor: i.owner.id,
-        auctionEndAt: i.auctionEndAt
+        imgAuthor: imgAuthor,
+        nameAuthor: nameAuthor,
+        auctionEndAt: i.auctionEndAt,
+        owner: i.owner.id
       }
       return item
+      }
+      else{
+        const met = await axios.get(`https://ipfs.io/ipfs/${i.tokenURI}`)
+        let item = { 
+        title: met.data.name,       
+        tokenId: Number(i.tokenId),
+        img: met.data.image,
+        onAuction: i.onAuction,
+        onDirectSale: i.onDirectSale,
+        price: price,
+        imgAuthor: imgAuthor,
+        nameAuthor: nameAuthor,
+        auctionEndAt: i.auctionEndAt,
+        owner: i.owner.id
+      }
+      return item
+      }
+      
+
     }))
 return items;
 }
@@ -92,7 +126,7 @@ const Home01 = () => {
 
         async function setData(){
             const items = await getData();
-            await setAuctionData(items)
+            setAuctionData(items)
             // console.log(items)
             setLoading(false);
         }

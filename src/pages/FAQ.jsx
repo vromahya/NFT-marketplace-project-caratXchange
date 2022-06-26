@@ -15,22 +15,22 @@ const FAQ = () => {
             {
                 key: "1",
                 title: 'Customer support is available ?',
-                text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.'
+                text: 'Yes! Please head to contact us page for any queries'
             },
             {
                 key: "2",
                 title: 'How do I find my transaction hash?',
-                text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.'
+                text: 'You can look into your wallet to find out the recent transactions'
             },
             {
                 key: "3",
                 title: 'What are gas fees on Axies?',
-                text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.'
+                text: 'Gas fees are minimal as we use polygon'
             },
             {
                 key: "4",
                 title: 'What is the effective staking amount?',
-                text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.'
+                text: 'Effective listing fees is 1 MATIC which is 0.48$ (at the time of writing)'
             },
         ]
     )

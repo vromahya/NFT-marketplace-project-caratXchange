@@ -4,7 +4,9 @@ import { Link } from 'react-router-dom'
 import CardModal from './CardModal';
 
 const TodayPicks = props => {
-    const data = props.data;
+    let data = props.data;
+    
+    data = data.filter(data=>data.onAuction===true || data.onDirectSale===true);
 
     const [visible , setVisible] = useState(8);
     const showMoreItems = () => {
@@ -21,7 +23,7 @@ const TodayPicks = props => {
                             <h2 className="tf-title pad-l-7">
                                 Today's Picks
                             </h2>
-                            <Link to="/explore-03" className="exp style2">EXPLORE MORE</Link>
+                            <Link to="/explore" className="exp style2">EXPLORE MORE</Link>
                         </div>
                     </div>
                     {
@@ -29,12 +31,12 @@ const TodayPicks = props => {
                             <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                                 <div className={`sc-card-product ${item.feature ? 'comingsoon' : '' } `}>
                                     <div className="card-media">
-                                        <Link to={`/item-details-02/${item.tokenId}`}><img src={item.img} alt="axies" /></Link>
+                                        <Link to={`/item-details/${item.tokenId}`}><img src={item.img} alt="axies" /></Link>
                                         {/* <Link to="/login" className="wishlist-button heart"><span className="number-like">{item.wishlist}</span></Link> */}
                                         <div className="coming-soon">{item.feature}</div>
                                     </div>
                                     <div className="card-title">
-                                        <h5 className="style2"><Link to={`/item-details-02/${item.tokenId}`}>"{item.title}"</Link></h5>
+                                        <h5 className="style2"><Link to={`/item-details/${item.tokenId}`}>{item.title}</Link></h5>
                                         {/* <div className="tags">{item.tags}</div> */}
                                     </div>
                                     <div className="meta-info">
@@ -44,7 +46,7 @@ const TodayPicks = props => {
                                             </div>
                                             <div className="info">
                                                 <span>Owned By</span>
-                                                <h6> <Link to="/authors-02">{item.nameAuthor}</Link> </h6>
+                                                <h6> <Link to={`/authors/${item.owner}`}>{item.nameAuthor}</Link> </h6>
                                             </div>
                                         </div>
                                          {item.onAuction && <div className="price">
@@ -68,7 +70,7 @@ const TodayPicks = props => {
                                     <div className="card-bottom">
                                         {item.onAuction && <button onClick={() => setModalShow(true)} className="sc-button style bag fl-button pri-3 no-bg"><span>Place Bid</span></button>}
                                         {item.onDirectSale && <button onClick={() => setModalShow(true)} className="sc-button style bag fl-button pri-3 no-bg"><span>Buy Now</span></button>}
-                                        <Link to="/activity-01" className="view-history reload">View History</Link>
+                                        
                                     </div>
                                 </div>
                             </div>

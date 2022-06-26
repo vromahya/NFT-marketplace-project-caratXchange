@@ -21,11 +21,9 @@ async function main() {
 
   fs.writeFileSync(
     './config.js',
-    `
-  export const auctionAddress = "${auction.address}"
-  export const marketplaceAddress = "${marketplace.address}"
-  export const nftMintAddress = "${nftMint.address}"
-  `
+    `export const auctionAddress = "${auction.address}"
+export const marketplaceAddress = "${marketplace.address}"
+export const nftMintAddress = "${nftMint.address}"`
   );
 
   console.log('Contracts deployed');
