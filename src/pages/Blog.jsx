@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import blogData from  '../assets/fake-data/data-blog'
 import Header from '../components/header/Header';
 import Footer from '../components/footer/Footer';
-import axios from 'axios'
+
 import { useEffect } from 'react';
 
 const {parse} = require('rss-to-json')
