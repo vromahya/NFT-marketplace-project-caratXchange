@@ -2,12 +2,12 @@ import React, {useState, useEffect} from 'react';
 import { Link } from 'react-router-dom'
 import Header from '../components/header/Header';
 import Footer from '../components/footer/Footer';
-import Explore from '../components/layouts/explore-04/Explore';
+
 import widgetSidebarData from '../assets/fake-data/data-widget-sidebar'
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
 import axios from 'axios';
 import {ethers} from 'ethers';
-import users from '../assets/fake-data/users';
+
 import { Accordion } from 'react-bootstrap-accordion'
 import ExploreItem from '../components/layouts/explore-04/ExploreItem';
 import defAvatar from '../assets/images/avatar/defaultAvatar.png';

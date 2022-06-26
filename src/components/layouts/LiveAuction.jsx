@@ -20,7 +20,7 @@ const LiveAuction = props => {
       
     
 
-    const [modalShow, setModalShow] = useState(false);
+    
 
     return (
         <Fragment>
@@ -109,10 +109,7 @@ const LiveAuction = props => {
                     </div>
                 </div>
             </section>
-            <CardModal
-                show={modalShow}
-                onHide={() => setModalShow(false)}
-            />
+            
         </Fragment>
         
     );

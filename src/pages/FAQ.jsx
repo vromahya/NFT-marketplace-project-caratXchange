@@ -32,6 +32,11 @@ const FAQ = () => {
                 title: 'What is the effective staking amount?',
                 text: 'Effective listing fees is 1 MATIC which is 0.48$ (at the time of writing)'
             },
+            {
+                key: "5",
+                title: 'How to register as a seller?',
+                text: 'You can send us a request through seller tab in the navigation'
+            }
         ]
     )
     return (
@@ -64,7 +69,7 @@ const FAQ = () => {
                                 Frequently Asked Questions
                             </h2>
                             <h5 className="sub-title help-center mg-bt-32 ">
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laborum obcaecati dignissimos quae quo ad iste ipsum officiis deleniti asperiores sit.
+                                A few of basic questions and answers
                             </h5>
                         </div>
                         <div className="col-md-12">

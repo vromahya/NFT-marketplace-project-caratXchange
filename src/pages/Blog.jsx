@@ -30,7 +30,7 @@ const Blog = () => {
 
             let date = Date(i.created);
             date = date.slice(0,15);
-            console.log(date);
+            
             const item = {
                 title: i.title,
                 nameAuthor: i.author,

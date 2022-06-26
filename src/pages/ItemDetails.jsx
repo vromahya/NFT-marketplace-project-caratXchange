@@ -43,7 +43,7 @@ const ItemDetails = () => {
     const [loading, setLoading] = useState(true);
     const [ownerData, setOwnerData] = useState();
     const [creatorData, setCreatorData] = useState();
-    const [onSale, setOnSale] = useState(true);
+    const [onSale, setOnSale] = useState(false);
     const [bidHistory,setBidHistory]= useState()
 
     // const [item, setItem] = useState({name:});
@@ -64,16 +64,16 @@ const ItemDetails = () => {
     console.log(priceDirect);
     
     /* user will be prompted to pay the asking proces to complete the transaction */
-    const price = ethers.utils.parseUnits("1", 'ether') 
+    const price = ethers.utils.parseUnits(priceDirect.toString(), 'ether') 
     
     const transaction = await contract.settleDirectSale(tokenId, {value:price});
-    console.log(transaction)
+    
     const tx = await transaction.wait();
-    console.log(tx)
-        toast.success('Success',{position: toast.POSITION.BOTTOM_RIGHT})
+    
+        toast.success(`Success! Transaction hash: ${tx.hash}`,{position: toast.POSITION.BOTTOM_RIGHT})
     } catch (error) {
               
-        toast.error(`Error in buying item: ${error}`,{position: toast.POSITION.BOTTOM_RIGHT} )
+        toast.error(`Error in buying item: ${error.message}`,{position: toast.POSITION.BOTTOM_RIGHT} )
     }
 
     }
@@ -88,9 +88,9 @@ const ItemDetails = () => {
              minimumBid = price;
         }
         else throw new Error('Ruko thoda sabra karo');
-
+        console.log(minimumBid)
         const value = ethers.utils.parseUnits(minimumBid.toString(), 'ether');
-        
+        console.log(value)
         let contract = new ethers.Contract(
             marketplaceAddress,
             MarketPlace.abi,
@@ -157,7 +157,7 @@ async function getData(tokenId) {
   return [data,history, owner, creator]
 }
             const [data, history, owner, creator] = await getData(tokenId);
-            console.log(owner, creator)
+            
             const meta = await axios.get(`https://ipfs.io/ipfs/${data.tokenURI}`)
             
             const nftData = {
@@ -184,6 +184,8 @@ async function getData(tokenId) {
             if(!nftData.onAuction && !nftData.onDirectSale){
                 setOnSale(false);
             }
+            setOnSale(true)
+            console.log(onSale);
             
             // console.log(userData)
             setLoading(false)
@@ -307,7 +309,7 @@ async function getData(tokenId) {
                                                         {
                                                             loading? <h5>loading</h5>:data.onAuction? <h5> {Math.round(priceDirect*1.1*1000000)/1000000} ETH</h5>:<h5> {Math.round(priceDirect*1000000)/1000000} ETH</h5>
                                                         }
-                                                        {loading?<h5>loading</h5>: <span className='pt-5'>=${Math.round(priceDirect*1000000)*0.48/1000000} </span>}
+                                                        {loading?<h5>loading</h5>: <span className='mt-1.5 pt-5'>=${Math.round(priceDirect*1000000)*0.48/1000000} </span>}
                                                     </div>
                                                 </div>
                                             </div>
@@ -320,7 +322,7 @@ async function getData(tokenId) {
                                     </div>
                                     <div>
                                         {
-                                        loading?<h5>loading</h5>:data.onAuction? <button onClick={()=>setShowAuctionForm(!showAuctionForm)} className="sc-button loadmore style bag fl-button pri-3"><span>Place a bid</span></button>:<button onClick={()=>{setShowDirectBuyForm(!showDirectBuyForm)}} className="sc-button loadmore style bag fl-button pri-3"><span>Buy Now</span></button>
+                                        loading?<h5>loading</h5>:onSale?<h5 className='mb-2 p-1'>Not on sale</h5> :data.onAuction? <button onClick={()=>setShowAuctionForm(!showAuctionForm)} className="sc-button loadmore style bag fl-button pri-3"><span>Place a bid</span></button>:<button onClick={()=>{setShowDirectBuyForm(!showDirectBuyForm)}} className="sc-button loadmore style bag fl-button pri-3"><span>Buy Now</span></button>
                                     }
                                     {
                                         showAuctionForm && <form onSubmit={handleSubmitAuction}>

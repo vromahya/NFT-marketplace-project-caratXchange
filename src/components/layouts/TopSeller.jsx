@@ -16,7 +16,7 @@ const TopSeller = props => {
                     <div className="col-md-12">
                         <div className="heading-live-auctions">
                             <h2 className="tf-title">
-                                Top Seller</h2>
+                                Top Sellers</h2>
                         </div>
                     </div>
                     <div className="col-md-12">
@@ -69,8 +69,8 @@ const TopSellerItem = props => (
                             <div className="badge"></div>
                         </div>
                         <div className="author-infor">
-                            <h5><Link to="/authors-02">{props.item.name}</Link></h5>
-                            <span className="price">{props.item.price}</span>
+                            <h5><Link to={`/authors/${props.item.address}`}>{props.item.name}</Link></h5>
+                            
                         </div>
                     </div>    	
                 </div>

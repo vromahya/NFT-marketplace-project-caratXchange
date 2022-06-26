@@ -41,11 +41,35 @@ const query = `
                         }
             }
 `;
+const userQuery = `query {
+    users(where:{seller:true},first:10 ){
+      id
+      seller
+    }
+  }`
 const client = new ApolloClient({
   uri: APIURL,
   cache: new InMemoryCache(),
 });
-
+async function getSellers(){
+  const res = await client.query({
+    query: gql(userQuery)
+  })
+  let u = res.data.users;
+  
+  const users = Promise.all(u.map(async i=>{
+    
+    const f = await axios.get(`https://forever-carat-api.herokuapp.com/api/v1/user/${i.id}`)
+    const g = f.data.user;
+    let user={
+      img: g.avatar,
+      name: g.name,
+      address: i.id
+    }
+    return user;
+  }))
+  return users;
+}
 async function getData() {
   const response = await client
   .query({
@@ -109,6 +133,7 @@ async function getData() {
         auctionEndAt: i.auctionEndAt,
         owner: i.owner.id
       }
+      console.log(item)
       return item
       }
       
@@ -121,11 +146,14 @@ const Home01 = () => {
 
     const [auctionData, setAuctionData] = useState([])
     const [loading, setLoading] = useState(true);
+    const [userData, setUserData] = useState();
 
     useEffect(()=>{
-
+        setLoading(true)
         async function setData(){
             const items = await getData();
+            const users = await getSellers();
+            setUserData(users)
             setAuctionData(items)
             // console.log(items)
             setLoading(false);
@@ -144,7 +172,7 @@ const Home01 = () => {
             <Header />
             <Slider data={heroSliderData} />
             <LiveAuction data={auctionData} />
-            <TopSeller data={topSellerData} />
+            {!loading && <TopSeller data={userData} />}
             <TodayPicks data={auctionData} />
             <Create />
             <Footer />

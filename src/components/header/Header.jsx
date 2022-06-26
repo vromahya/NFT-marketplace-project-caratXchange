@@ -93,7 +93,7 @@ const Header = () => {
                                     </ul>
                                 </nav>
                                 <div className="flat-search-btn flex">
-                                    <div className="sc-btn-top mg-r-12" id="site-header">
+                                    <div className="sc-btn-top mg-r-12 pt-3" id="site-header">
                                         <ConnectWallet className="mt-10"/>
                                     </div>
 

@@ -12,7 +12,7 @@ const menus = [
   {
     id: 3,
     name: 'Sellers',
-    links: '/activity',
+    links: '/create-item',
   },
   {
     id: 4,
@@ -21,20 +21,8 @@ const menus = [
   },
   {
     id: 5,
-    name: 'Pages',
-    links: '#',
-    namesub: [
-      {
-        id: 2,
-        sub: 'Create Item',
-        links: '/create-item',
-      },
-      {
-        id: 7,
-        sub: 'FAQ',
-        links: '/faq',
-      },
-    ],
+    name: 'FAQ',
+    links: '/faq',
   },
   {
     id: 7,

@@ -99,10 +99,15 @@ async function uploadToIPFS2() {
 }
 async function listNFTForDirectSale() {
   try {
-      const hash = await uploadToIPFS();
-  
+    console.log('button clicked');
+  const hash = await uploadToIPFS();
+  console.log('file uploaded')
+
   const web3Modal = new Web3Modal();
+  console.log(web3Modal)
   const connection = await web3Modal.connect();
+  console.log(connection)
+  console.log('wallet connection done')
   const provider = new ethers.providers.Web3Provider(connection);
   const signer = provider.getSigner();
   /* next, create the item */
