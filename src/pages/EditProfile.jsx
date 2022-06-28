@@ -1,24 +1,43 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Header from '../components/header/Header';
 import Footer from '../components/footer/Footer';
 import avt from '../assets/images/avatar/avata_profile.jpg'
-import bg1 from '../assets/images/backgroup-secsion/option1_bg_profile.jpg'
-import bg2 from '../assets/images/backgroup-secsion/option2_bg_profile.jpg'
+
 import {create as ipfsHttpClient} from 'ipfs-http-client';
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import axios from 'axios';
+import { ethers } from 'ethers'
+import Web3Modal from 'web3modal'
 
 const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
 
 const EditProfile = () => {
     const {address} = useParams();
-    console.log(address)
+    
     const [formData, setFormData] = useState({address: address, name:'', email:'', avatar:''})
 
-    const [loading, setLoading] = useState(true);
-    const [userExists, setUserExists] = useState(false);
+    const [userHimself, setuserHimself] = useState(false)
+
+    useEffect(() => {
+        const checkUser= async ()=>{
+            const web3Modal = new Web3Modal();
+            const connection = await web3Modal.connect();
+            const provider = new ethers.providers.Web3Provider(connection);
+            const signer = provider.getSigner();
+            const addressConnection = await signer.getAddress();
+    
+            console.log(addressConnection);
+                if(addressConnection.toLowerCase()===address){
+                    setuserHimself(true)
+                }
+        }
+        checkUser();
+    }, [])
+    
+    
+    
     
     async function onChange(e) {
         const file = e.target.files[0];
@@ -28,7 +47,7 @@ const EditProfile = () => {
             });
             const url = `https://ipfs.io/ipfs/${added.path}`;
             setFormData({...formData, avatar:url});
-            notify('File uploaded',"")
+            toast.success('File uploaded',{position: toast.POSITION.BOTTOM_RIGHT})
         } catch (error) {
             errorNotification('Error uploading file: ', error);
         }
@@ -48,6 +67,13 @@ const EditProfile = () => {
         axios.put(`https://forever-carat-api.herokuapp.com/api/v1/user/${address}`,data,{headers:{"Content-Type" : "application/json"}})
         .then(e=>notify(e))
         .catch(e=>errorNotification('Error in updating profile',e.response.data))
+    }
+    if(!userHimself){
+        return <div>
+            <h1>
+                Unauthorized
+            </h1>
+        </div>
     }
     return (
         <div>

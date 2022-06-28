@@ -5,7 +5,7 @@ import Footer from '../components/footer/Footer';
 import Countdown from "react-countdown";
 import { Tab, Tabs, TabList, TabPanel  } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
-import img1 from '../assets/images/box-item/image-box-6.jpg'
+import img1 from '../assets/images/box-item/img1.png'
 import avt from '../assets/images/avatar/avt-9.jpg'
 import {create as ipfsHttpClient} from 'ipfs-http-client';
 import { ToastContainer, toast } from 'react-toastify'
@@ -99,15 +99,14 @@ async function uploadToIPFS2() {
 }
 async function listNFTForDirectSale() {
   try {
-    console.log('button clicked');
+    
   const hash = await uploadToIPFS();
-  console.log('file uploaded')
+  
 
   const web3Modal = new Web3Modal();
-  console.log(web3Modal)
+  
   const connection = await web3Modal.connect();
-  console.log(connection)
-  console.log('wallet connection done')
+  
   const provider = new ethers.providers.Web3Provider(connection);
   const signer = provider.getSigner();
   /* next, create the item */
@@ -180,7 +179,7 @@ async function listNFTForAuction(){
         let transaction = await mint.mint(hash);
         let tx = await transaction.wait();
         
-        console.log(tx.events)
+        
 
         let eventVal = tx.events.find(event => event.event === "Transfer").args.tokenId;
         
@@ -206,7 +205,7 @@ async function listNFTForAuction(){
       navigate("/");
   }, 5000);
     } catch (error) {
-        let e = error.data.message;
+        let e = error.error.data.message;
         if(e==='execution reverted: ER_CODE_1'){
             toast.error(`Only seller can create item`,{position: toast.POSITION.BOTTOM_RIGHT} )
             return;
@@ -321,11 +320,11 @@ setAuctionData({...formInput2});
                                             previewStateFixedPice?
                                         <div>
                                             <span>Price</span>
-                                            <h5>{formInput.price} Eth</h5>
+                                            <h5>{formInput.price} MATIC</h5>
                                         </div>:
                                         <div>
                                             <span>Current Bid</span>
-                                            <h5>{formInput2.minimumBid}</h5>
+                                            <h5>{formInput2.minimumBid} MATIC</h5>
                                         </div>
                                         }
                                     </div>
@@ -360,7 +359,7 @@ setAuctionData({...formInput2});
                                         <TabPanel>
                                             <form onSubmit={handleSubmitTab1} >
                                                 <h4 className="title-create-item">Price</h4>
-                                                <input type="text" placeholder="Enter price for one item (ETH)" onChange={(e)=>{setFormInput({...formInput, price: e.target.value})}}  />
+                                                <input type="text" placeholder="Enter price for one item (MATIC)" onChange={(e)=>{setFormInput({...formInput, price: e.target.value})}}  />
 
                                                 <h4 className="title-create-item">Title</h4>
                                                 <input type="text" placeholder="Item Name" onChange={(e)=>{setFormInput({...formInput, name: e.target.value})}} />
@@ -368,22 +367,20 @@ setAuctionData({...formInput2});
                                                 <h4 className="title-create-item">Collection <span className='text-muted' >(Optional)</span> </h4>
                                                 <input type='text' placeholder="e.g. “King collection”" onChange={(e)=>{setFormInput({...formInput, collection: e.target.value})}}></input>
                                                 <h4 className="title-create-item">Description</h4>
-                                                <textarea placeholder="e.g. “This is very limited item”" onChange={(e)=>{setFormInput({...formInput, description: e.target.value})}}></textarea>
-                                                
-
-                                                
+                                                <textarea placeholder="e.g. “This is very limited item”" onChange={(e)=>{setFormInput({...formInput, description: e.target.value})}} maxLength={500}></textarea>
+                                                                                              
                                                 <button className="mt-12" type='submit' >Create Item</button>
                                             </form>
                                         </TabPanel>
                                         <TabPanel>
                                             <form onSubmit={handleSubmitTab2}>
                                                 <h4 className="title-create-item">Minimum bid</h4>
-                                                <input type="text" placeholder="enter minimum bid" onChange={(e)=>setFormInput2({...formInput2, minimumBid: e.target.value})} />
+                                                <input type="text" placeholder="Enter Minimum Bid (MATIC)" onChange={(e)=>setFormInput2({...formInput2, minimumBid: e.target.value})} />
                                                 <div className="row">
                                                     
                                                     <div className="col-md-6">
                                                         <h5 className="title-create-item">Duration</h5>
-                                                        <input type="number" placeholder='Duration in days' name="duration" id="duration" className="form-control" min="1" onChange={e=>setFormInput2({...formInput2, duration: e.target.value})}/>
+                                                        <input type="number" placeholder='Duration in Days' name="duration" id="duration" className="form-control" min="1" onChange={e=>setFormInput2({...formInput2, duration: e.target.value})}/>
                                                     </div>                            
                                                 </div>
 
@@ -391,7 +388,7 @@ setAuctionData({...formInput2});
                                                 <input type="text" placeholder="Item Name" onChange={e=>setFormInput2({...formInput2, name: e.target.value})}/>
 
                                                 <h4 className="title-create-item">Collection</h4>
-                                                <input placeholder="e.g. “King collection”" onChange={(e)=>{setFormInput2({...formInput2, collection: e.target.value})}}></input>
+                                                <input type='text' placeholder="e.g. “King's collection”" onChange={(e)=>{setFormInput2({...formInput2, collection: e.target.value})}}></input>
                                                 <h4 className="title-create-item">Description</h4>
                                                 <textarea placeholder="e.g. “This is very limited item”" onChange={e=>setFormInput2({...formInput2, description: e.target.value})} maxLength={500}></textarea>
                                             <button className="mt-12" type='submit' >Create Item</button>

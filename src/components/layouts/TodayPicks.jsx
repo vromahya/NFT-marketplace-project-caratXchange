@@ -51,12 +51,12 @@ const TodayPicks = props => {
                                         </div>
                                          {item.onAuction && <div className="price">
                                                 <span>Current Bid</span>
-                                                <h5> {item.price}</h5>
+                                                <h5> {item.price} MATIC</h5>
                                             </div>}
                                             {
                                                 item.onDirectSale && <div className="price">
                                                 <span>Price</span>
-                                                <h5> {item.price}</h5>
+                                                <h5> {item.price} MATIC </h5>
                                             </div>                                            
                                             }
                                             {

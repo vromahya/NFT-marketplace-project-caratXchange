@@ -8,6 +8,8 @@ import axios from 'axios';
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
 import { useNavigate } from "react-router-dom";
 import avt from '../assets/images/avatar/avt-author-tab.jpg'
+import { ethers } from 'ethers'
+import Web3Modal from 'web3modal'
 
 import ItemDisplay from '../components/layouts/ItemDisplay';
 
@@ -24,6 +26,8 @@ const Authors = () => {
     const [loading, setLoading]= useState(true);
     const [ownedTokenData, setOwnedTokenData] = useState();
     const [createdTokenData, setCreatedTokenData] = useState();
+    
+    const [userHimself, setuserHimself] = useState(false)
     
     
     const {address} = useParams()
@@ -147,6 +151,22 @@ const Authors = () => {
         getUser();
         
     },[])
+    useEffect(() => {
+        const checkUser= async ()=>{
+            const web3Modal = new Web3Modal();
+            const connection = await web3Modal.connect();
+            const provider = new ethers.providers.Web3Provider(connection);
+            const signer = await provider.getSigner();
+            const addressConnection = await signer.getAddress();
+    
+            
+                if(addressConnection.toLowerCase()===address){
+                    setuserHimself(true)
+                }
+        }
+        checkUser();
+    }, [])
+    
 
     const [menuTab] = useState(
         [
@@ -207,7 +227,7 @@ const Authors = () => {
                             </div>
                             <div className="widget-social style-3">
                                 
-                                <div className="btn-profile"><Link to={`/edit-profile/${address}`} className="sc-button style-1 follow">Edit Profile</Link></div>
+                                {userHimself && <div className="btn-profile"><Link to={`/edit-profile/${address}`} className="sc-button style-1 follow">Edit Profile</Link></div>}
                             </div>
                         </div>
                         <Tabs>
@@ -223,10 +243,10 @@ const Authors = () => {
                                 <div className="content-inner">
                                     <div className="row">
                                     <TabPanel>
-                                         {loading?<></>:<ItemDisplay data={ownedTokenData} userData={userData} />}       
+                                         {loading?<></>:<ItemDisplay className='flex-wrap' data={ownedTokenData} userData={userData} />}       
                                     </TabPanel>
                                     <TabPanel>
-                                         {loading?<></>:<ItemDisplay data={createdTokenData} userData={userData} />}       
+                                         {loading?<></>:<ItemDisplay className='flex-wrap' data={createdTokenData} userData={userData} />}       
                                     </TabPanel>
                                     </div>
                                 </div>

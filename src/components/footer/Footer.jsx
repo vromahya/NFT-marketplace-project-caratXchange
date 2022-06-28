@@ -5,18 +5,6 @@ import logofooter from '../../assets/images/logo/logo2.png'
 const Footer = () => {
     const accountList = [
         {
-            title: "Authors",
-            link: "/authors-01"
-        },
-        {
-            title: "Collection",
-            link: "/wallet-connect"
-        },
-        {
-            title: "Author Profile",
-            link: "/edit-profile"
-        },
-        {
             title: "Create Item",
             link: "/create-item"
         },
@@ -27,26 +15,18 @@ const Footer = () => {
             link: "/help-center"
         },
         {
-            title: "Live Auctions",
-            link: "/live-auctions"
-        },
-        {
-            title: "Item Details",
-            link: "/item-details-01"
-        },
-        {
-            title: "Activity",
-            link: "/activity-01"
+            title: "How it Works?",
+            link: "/howitworks"
         },
     ]
     const companyList = [
         {
             title: "Explore",
-            link: "/explore-01"
+            link: "/explore"
         },
         {
             title: "Contact Us",
-            link: "/contact-01"
+            link: "/contact"
         },
         {
             title: "Our Blog",
@@ -124,7 +104,7 @@ const Footer = () => {
                                         
                                     </Link>
                                 </div>
-                                <p className="sub-widget-logo">Lorem ipsum dolor sit amet,consectetur adipisicing elit. Quis non, fugit totam vel laboriosam vitae.</p>
+                                <p className="sub-widget-logo">A market place to buy physical jewelery NFT</p>
                             </div>
                         </div>
                         <div className="col-lg-2 col-md-4 col-sm-5 col-5">

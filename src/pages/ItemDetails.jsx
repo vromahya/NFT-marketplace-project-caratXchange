@@ -6,7 +6,7 @@ import Countdown from "react-countdown";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 
-import img1 from '../assets/images/avatar/avt-3.jpg'
+
 import img6 from '../assets/images/avatar/avt-8.jpg'
 import img7 from '../assets/images/avatar/avt-2.jpg'
 import imgdetail1 from '../assets/images/box-item/images-item-details2.jpg'
@@ -15,10 +15,10 @@ import Web3Modal from 'web3modal'
 import MarketPlace from '../MarketPlace.json';
 
 import { marketplaceAddress} from '../config';
-import defAvatar from '../assets/images/avatar/defaultAvatar.png'
+
 
 import axios from 'axios';
-import users from '../assets/fake-data/users'
+
 import {ToastContainer, toast} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
@@ -43,7 +43,7 @@ const ItemDetails = () => {
     const [loading, setLoading] = useState(true);
     const [ownerData, setOwnerData] = useState();
     const [creatorData, setCreatorData] = useState();
-    const [onSale, setOnSale] = useState(false);
+    const [notOnSale, setNotOnSale] = useState(false);
     const [bidHistory,setBidHistory]= useState()
 
     // const [item, setItem] = useState({name:});
@@ -61,7 +61,7 @@ const ItemDetails = () => {
     const signer = provider.getSigner();
     
     const contract = new ethers.Contract(marketplaceAddress, MarketPlace.abi, signer)
-    console.log(priceDirect);
+    
     
     /* user will be prompted to pay the asking proces to complete the transaction */
     const price = ethers.utils.parseUnits(priceDirect.toString(), 'ether') 
@@ -73,7 +73,7 @@ const ItemDetails = () => {
         toast.success(`Success! Transaction hash: ${tx.hash}`,{position: toast.POSITION.BOTTOM_RIGHT})
     } catch (error) {
               
-        toast.error(`Error in buying item: ${error.message}`,{position: toast.POSITION.BOTTOM_RIGHT} )
+        toast.error(`Error in buying item: ${error.error.data.message}`,{position: toast.POSITION.BOTTOM_RIGHT} )
     }
 
     }
@@ -88,9 +88,9 @@ const ItemDetails = () => {
              minimumBid = price;
         }
         else throw new Error('Ruko thoda sabra karo');
-        console.log(minimumBid)
+        
         const value = ethers.utils.parseUnits(minimumBid.toString(), 'ether');
-        console.log(value)
+        
         let contract = new ethers.Contract(
             marketplaceAddress,
             MarketPlace.abi,
@@ -100,7 +100,7 @@ const ItemDetails = () => {
             await transaction.wait();
             toast.success('Success',{position: toast.POSITION.BOTTOM_RIGHT})
       } catch (error) {
-          toast.error(`Error: ${error.message}`,{position: toast.POSITION.BOTTOM_RIGHT})
+          toast.error(`Error: ${error.error.data.message}`,{position: toast.POSITION.BOTTOM_RIGHT})
       }
     }
 
@@ -174,6 +174,7 @@ async function getData(tokenId) {
             
             
             setData(nftData)
+            console.log(nftData)
             setBidHistory(history)
             const reservedPrice = data.reservedPrice/1000000000000000000;
 
@@ -182,10 +183,13 @@ async function getData(tokenId) {
             // console.log('API data after set',additionalData);
             
             if(!nftData.onAuction && !nftData.onDirectSale){
-                setOnSale(false);
+                setNotOnSale(true);
+            }else{
+                
+                setNotOnSale(false)
             }
-            setOnSale(true)
-            console.log(onSale);
+
+            
             
             // console.log(userData)
             setLoading(false)
@@ -215,11 +219,7 @@ async function getData(tokenId) {
 
 
 
-    const [dataHistory] = useState(
-        [
-
-        ]
-    )
+    
 
     return (
         <div className='item-details'>
@@ -266,25 +266,25 @@ async function getData(tokenId) {
                                         </div>
                                     </div>
                                     <div className="client-infor sc-card-product">
-                                        <div className="meta-info">
-                                            <div className="author">
+                                        <div className="meta-info overflow-hidden">
+                                            <div className="author ">
                                                 <div className="avatar">
                                                     {loading? <img src={img6} alt="Axies" />: <img src={ownerData.avatar} alt="Axies" />}
                                                 </div>
-                                                <div className="info">
+                                                <div className="info overflow-hidden">
                                                     <span>Owned By</span>
-                                                    {loading?<h6> <Link to="/author-02">Loading</Link> </h6>:<h6> <Link to="/author-02">{ownerData.name}</Link> </h6>}
+                                                    {loading?<h6> <Link to="/author-02">Loading</Link> </h6>:<h6> <Link to={`/authors/${data.owner.id}`}>{ownerData.name}</Link> </h6>}
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="meta-info">
-                                            <div className="author">
+                                            <div className="author ">
                                                 <div className="avatar">
                                                     {loading?<img src={img7} alt="Axies" />:<img src={creatorData.avatar} alt="Axies" />}
                                                 </div>
                                                 <div className="info">
                                                     <span>Created By</span>
-                                                    {loading?<h6> <Link to="/author-02">loading</Link> </h6>:<h6> <Link to="/author-02">{creatorData.name}</Link> </h6>}
+                                                    {loading?<h6> <Link to="/author-02">loading</Link> </h6>:<h6> <Link to={`/authors/${data.creator.id}`}>{creatorData.name}</Link> </h6>}
                                                 </div>
                                             </div>
                                         </div>
@@ -299,7 +299,7 @@ async function getData(tokenId) {
                                                 <li><span>Collection : </span><h6>Cyberpunk City Art</h6> </li>
                                             </ul>
                                         </div>
-                                        {onSale?<div className="item-style-2">
+                                        {notOnSale?<></>:<div className="item-style-2">
                                             <div className="item meta-price">
                                                 {
                                                     loading? <p>loading</p>:data.onAuction? <span className="heading">Minimum Bid</span>:<span className="heading">Price</span>
@@ -318,17 +318,17 @@ async function getData(tokenId) {
                                                         <span>Auction Ended</span>
                                                     </Countdown>      
                                                 </div>:<></>}
-                                        </div>:<></>}
+                                        </div>}
                                     </div>
                                     <div>
                                         {
-                                        loading?<h5>loading</h5>:onSale?<h5 className='mb-2 p-1'>Not on sale</h5> :data.onAuction? <button onClick={()=>setShowAuctionForm(!showAuctionForm)} className="sc-button loadmore style bag fl-button pri-3"><span>Place a bid</span></button>:<button onClick={()=>{setShowDirectBuyForm(!showDirectBuyForm)}} className="sc-button loadmore style bag fl-button pri-3"><span>Buy Now</span></button>
+                                        loading?<h5>loading</h5>:notOnSale?<h5 className='mb-2 p-1'>Not on sale</h5> :data.onAuction? <button onClick={()=>setShowAuctionForm(!showAuctionForm)} className="sc-button loadmore style bag fl-button pri-3"><span>Place a bid</span></button>:<button onClick={()=>{setShowDirectBuyForm(!showDirectBuyForm)}} className="sc-button loadmore style bag fl-button pri-3"><span>Buy Now</span></button>
                                     }
                                     {
                                         showAuctionForm && <form onSubmit={handleSubmitAuction}>
                                             
                                             <input type="text" placeholder="enter bid amount" onChange={e => setPrice(e.target.value)} />
-                                            <button className="sc-button loadmore style bag fl-button pri-3 mt-3" type='submit'>Place Bid</button>
+                                            <button className="sc-button loadmore style bag fl-button pri-3 mt-10" type='submit'>Place Bid</button>
                                         </form>
                                     }
                                     {

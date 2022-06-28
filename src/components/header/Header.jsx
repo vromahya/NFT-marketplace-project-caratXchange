@@ -8,7 +8,7 @@ import logodark from '../../assets/images/logo/logo_dark.png'
 import logodark2x from '../../assets/images/logo/logo_dark@2x.png'
 import imgsun from '../../assets/images/icon/sun.png'
 import avt from '../../assets/images/avatar/avt-2.jpg'
-import logo_luxurio from '../../assets/images/logo/logo_Luxurio.png'
+
 import ConnectWallet from './Connector';
 
 
@@ -32,7 +32,7 @@ const Header = () => {
 
     const menuLeft = useRef(null)
     const btnToggle = useRef(null)
-    const btnSearch = useRef(null)
+    
 
     const menuToggle = () => {
         
@@ -40,9 +40,7 @@ const Header = () => {
         btnToggle.current.classList.toggle('active');
     }
 
-    const searchBtn = () => {
-        btnSearch.current.classList.toggle('active');
-    }
+    
 
     const [activeIndex, setActiveIndex] = useState(null);
     const handleOnClick = index => {

@@ -10,6 +10,7 @@ import Authors from './Authors';
 
 import CreateItem from './CreateItem';
 import EditProfile from './EditProfile';
+import HowItWorks from './HowItWorks';
 
 import FAQ from './FAQ';
 import Contact01 from './Contact01';
@@ -26,6 +27,7 @@ const routes = [
   { path: '/edit-profile/:address', component: <EditProfile /> },
   { path: '/faq', component: <FAQ /> },
   { path: '/contact', component: <Contact01 /> },
+  { path: '/howitworks', component: <HowItWorks /> },
 ];
 
 export default routes;

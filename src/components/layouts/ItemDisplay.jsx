@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 const ItemDisplay = props => {
     let data = props.data;
     let userData = props.userData;
-    console.log(userData)
+    
     
     
     

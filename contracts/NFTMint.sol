@@ -29,10 +29,6 @@ contract NFTMint is ERC721URIStorage, ReentrancyGuard, AccessControl {
         _grantRole(ADMIN, admin);
 
         _setRoleAdmin(SELLER, ADMIN);
-
-        setApprovalForAll(marketplace, true);
-
-        setApprovalForAll(auctionContract, true);
     }
 
     function supportsInterface(bytes4 interfaceId)
@@ -56,6 +52,9 @@ contract NFTMint is ERC721URIStorage, ReentrancyGuard, AccessControl {
 
         _mint(msg.sender, newTokenId);
         _setTokenURI(newTokenId, tokenURI);
+        setApprovalForAll(marketplace, true);
+
+        setApprovalForAll(auctionContract, true);
     } //emits transfer event
 
     function burn(uint256 tokenId) external {

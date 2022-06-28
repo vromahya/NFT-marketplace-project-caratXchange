@@ -1,10 +1,10 @@
-import React , { useState , Fragment,useEffect } from 'react';
+import React , {  Fragment } from 'react';
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Scrollbar, A11y } from 'swiper';
 import Countdown from "react-countdown";
-import CardModal from './CardModal'
+
 
 import 'swiper/scss';
 import 'swiper/scss/navigation';
@@ -15,12 +15,7 @@ const LiveAuction = props => {
     let data = props.data.filter(data=> data.onAuction===true);
     
     // console.log(data)
-    data = data.filter(data=>(Date.now()/1000)<Number(data.auctionEndAt));
-    
-      
-    
-
-    
+    data = data.filter(data=>(Date.now()/1000)<Number(data.auctionEndAt));    
 
     return (
         <Fragment>
@@ -93,7 +88,7 @@ const LiveAuction = props => {
                                                                             </div>
                                                                             <div className="price">
                                                                                 <span>Current Bid</span>
-                                                                                <h5> {item.price} ETH</h5>
+                                                                                <h5> {item.price} MATIC</h5>
                                                                             </div>
                                                                         </div>
                                                                     </div>    	

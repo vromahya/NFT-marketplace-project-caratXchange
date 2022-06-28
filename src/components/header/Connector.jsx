@@ -4,12 +4,14 @@ import { chain, configureChains, createClient, WagmiConfig } from 'wagmi';
 import { infuraProvider } from 'wagmi/providers/infura';
 import { publicProvider } from 'wagmi/providers/public';
 import { ConnectWalletBtn } from './ConnectWalletBtn';
+
+
 const { chains, provider } = configureChains(
   [chain.polygon, chain.polygonMumbai],
   [infuraProvider({ alchemyId: process.env.INFURA_ID }), publicProvider()]
 );
 const { connectors } = getDefaultWallets({
-  appName: 'My RainbowKit App',
+  appName: 'CaratXchange',
   chains,
 });
 const wagmiClient = createClient({
@@ -18,7 +20,9 @@ const wagmiClient = createClient({
   provider,
 });
 
+
 const ConnectWallet = () => {
+  
   return (
     <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider chains={chains}>

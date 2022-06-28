@@ -6,18 +6,18 @@ import Slider from '../components/slider/Slider';
 
 import LiveAuction from '../components/layouts/LiveAuction';
 import TopSeller from '../components/layouts/TopSeller';
-import topSellerData from '../assets/fake-data/data-top-seller'
+
 import TodayPicks from '../components/layouts/TodayPicks';
 
 import Create from '../components/layouts/Create';
 import axios from 'axios';
 import {ethers} from 'ethers';
-import defAvatar from '../assets/images/avatar/defaultAvatar.png';
+
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
 // import users from '../assets/fake-data/users'
 
 import { useState, useEffect } from 'react';
-import users from '../assets/fake-data/users';
+
 
 const APIURL =
   'https://api.thegraph.com/subgraphs/name/vromahya/forevercarat-nftquery';
@@ -133,7 +133,7 @@ async function getData() {
         auctionEndAt: i.auctionEndAt,
         owner: i.owner.id
       }
-      console.log(item)
+      
       return item
       }
       
