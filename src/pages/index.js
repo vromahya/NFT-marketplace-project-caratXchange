@@ -5,7 +5,7 @@ import ItemDetails from './ItemDetails';
 import Activity01 from './Activity01';
 import Blog from './Blog';
 import BlogDetails from './BlogDetails';
-
+import HelpCenter from './Help';
 import Authors from './Authors';
 
 import CreateItem from './CreateItem';
@@ -28,6 +28,7 @@ const routes = [
   { path: '/faq', component: <FAQ /> },
   { path: '/contact', component: <Contact01 /> },
   { path: '/howitworks', component: <HowItWorks /> },
+  { path: '/help-center', component: <HelpCenter /> },
 ];
 
 export default routes;
