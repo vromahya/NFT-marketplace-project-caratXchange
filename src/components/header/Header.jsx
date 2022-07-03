@@ -9,8 +9,8 @@ import logodark2x from '../../assets/images/logo/logo_dark@2x.png'
 import imgsun from '../../assets/images/icon/sun.png'
 import avt from '../../assets/images/avatar/avt-2.jpg'
 
-import ConnectWallet from './Connector';
 
+import ConnectWalletBtn from './ConnectWalletBtn';
 
 const Header = () => {
     const { pathname } = useLocation();
@@ -92,7 +92,7 @@ const Header = () => {
                                 </nav>
                                 <div className="flat-search-btn flex">
                                     <div className="sc-btn-top mg-r-12 pt-3" id="site-header">
-                                        <ConnectWallet className="mt-10"/>
+                                        <ConnectWalletBtn className="mt-10"/>
                                     </div>
 
                                     <div className="admin_active" id="header_admin">

@@ -22,7 +22,7 @@ import NFTMint from '../NFTMint.json';
 import {nftMintAddress} from '../config';
 import MarketPlace from '../MarketPlace.json';
 import { marketplaceAddress } from '../config';
-
+import { useStateContext } from '../context/ContextProvider'; 
 
 import users from '../assets/fake-data/users';
 
@@ -43,9 +43,10 @@ const [loading, setLoading] = useState(true);
 
 const [user, setUser] = useState();
 
-
+const {web3Signer} = useStateContext();
 
 async function onChange(e) {
+    
   const file = e.target.files[0];
   try {
     const added = await client.add(file, {
@@ -103,17 +104,15 @@ async function listNFTForDirectSale() {
   const hash = await uploadToIPFS();
   
 
-  const web3Modal = new Web3Modal();
-  
-  const connection = await web3Modal.connect();
-  
-  const provider = new ethers.providers.Web3Provider(connection);
-  const signer = provider.getSigner();
+  if(!web3Signer){
+    toast.error('Please connect wallet first',{position: toast.POSITION.BOTTOM_RIGHT})
+    return;
+  }
   /* next, create the item */
   let mint = new ethers.Contract(
       nftMintAddress,
     NFTMint.abi,
-    signer
+    web3Signer
   );
 
     let transaction = await mint.mint(hash);
@@ -124,13 +123,14 @@ async function listNFTForDirectSale() {
 
   
     let tokenId = Number(eventVal._hex);
-  
+    
   
     let market = new ethers.Contract(
       marketplaceAddress,
       MarketPlace.abi,
-      signer
+      web3Signer
       )
+      
       let listingPrice = await market.getListingFee();
             listingPrice = listingPrice.toString();
       const price = ethers.utils.parseUnits(directBuyData.price, 'ether');
@@ -148,8 +148,8 @@ async function listNFTForDirectSale() {
         if(e==='execution reverted: ER_CODE_1'){
             toast.error(`Only seller can create item`,{position: toast.POSITION.BOTTOM_RIGHT} )
             return;
-        }
-        errorNotification('Error in putting item on sale',error);
+        } 
+        errorNotification('Error in putting item on sale',error.message);
     }
     
 }
@@ -157,14 +157,15 @@ async function listNFTForAuction(){
 
     try {
         const hash = await uploadToIPFS2();
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    const signer = provider.getSigner();
     
+    if(!web3Signer){
+    toast.error('Please connect wallet first',{position: toast.POSITION.BOTTOM_RIGHT})
+    return;
+  }
     // console.log('clean initial code')
 
-    const address = signer.getAddress();
+    const address = web3Signer._address;
+    console.log(address);
     
     const startTime = Math.floor(Date.now()/1000);
     // console.log('clean getting address and startime')
@@ -173,7 +174,7 @@ async function listNFTForAuction(){
     let mint = new ethers.Contract(
         nftMintAddress,
         NFTMint.abi,
-        signer
+        web3Signer
         );
         
         let transaction = await mint.mint(hash);
@@ -189,7 +190,7 @@ async function listNFTForAuction(){
         let market = new ethers.Contract(
             marketplaceAddress,
             MarketPlace.abi,
-            signer            
+            web3Signer            
             )
             const minimumBid = ethers.utils.parseUnits(auctionData.minimumBid, 'ether');
             let listingPrice = await market.getListingFee();
@@ -242,8 +243,6 @@ useEffect(()=>{
     setLoading(true)    
     setUser(users[0])
     setLoading(false);
-    
-    
 },[])
 
 useEffect(()=>{

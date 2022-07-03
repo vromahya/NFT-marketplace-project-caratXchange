@@ -11,6 +11,8 @@ import avt from '../assets/images/avatar/avt-author-tab.jpg'
 import { ethers } from 'ethers'
 import Web3Modal from 'web3modal'
 
+import { useStateContext } from '../context/ContextProvider'; 
+
 import ItemDisplay from '../components/layouts/ItemDisplay';
 
 const APIURL = 'https://api.thegraph.com/subgraphs/name/vromahya/forevercarat-nftquery'
@@ -29,7 +31,8 @@ const Authors = () => {
     
     const [userHimself, setuserHimself] = useState(false)
     
-    
+    const {web3Signer} = useStateContext();
+
     const {address} = useParams()
     
     
@@ -153,12 +156,8 @@ const Authors = () => {
     },[])
     useEffect(() => {
         const checkUser= async ()=>{
-            const web3Modal = new Web3Modal();
-            const connection = await web3Modal.connect();
-            const provider = new ethers.providers.Web3Provider(connection);
-            const signer = await provider.getSigner();
-            const addressConnection = await signer.getAddress();
-    
+            
+            const addressConnection= web3Signer._address
             
                 if(addressConnection.toLowerCase()===address){
                     setuserHimself(true)
@@ -182,11 +181,6 @@ const Authors = () => {
         ]
     )
    
-
-   
-
-    
-
     return (
         <div className='authors-2'>
             <Header />

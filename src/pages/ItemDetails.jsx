@@ -5,7 +5,7 @@ import { Link, useParams } from 'react-router-dom'
 import Countdown from "react-countdown";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
-
+import { useStateContext } from '../context/ContextProvider'; 
 
 import img6 from '../assets/images/avatar/avt-8.jpg'
 import img7 from '../assets/images/avatar/avt-2.jpg'
@@ -22,6 +22,9 @@ import axios from 'axios';
 import {ToastContainer, toast} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
+
+const Buffer = require('buffer/').Buffer;
+
 const APIURL =
   'https://api.thegraph.com/subgraphs/name/vromahya/forevercarat-nftquery';
 
@@ -45,6 +48,7 @@ const ItemDetails = () => {
     const [creatorData, setCreatorData] = useState();
     const [notOnSale, setNotOnSale] = useState(false);
     const [bidHistory,setBidHistory]= useState()
+    const {web3Signer} = useStateContext()
 
     // const [item, setItem] = useState({name:});
 
@@ -55,34 +59,36 @@ const ItemDetails = () => {
     
     const createDirectSale = async () => {
     try {
-        const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner();
-    
-    const contract = new ethers.Contract(marketplaceAddress, MarketPlace.abi, signer)
+        
+    if(!web3Signer){
+        toast.error('Please connect the wallet first',{position: toast.POSITION.BOTTOM_RIGHT})
+        return;
+    }
+    const contract = new ethers.Contract(marketplaceAddress, MarketPlace.abi, web3Signer)
     
     
     /* user will be prompted to pay the asking proces to complete the transaction */
     const price = ethers.utils.parseUnits(priceDirect.toString(), 'ether') 
     
     const transaction = await contract.settleDirectSale(tokenId, {value:price});
-    
+    console.log('transaction', transaction)
     const tx = await transaction.wait();
     
         toast.success(`Success! Transaction hash: ${tx.hash}`,{position: toast.POSITION.BOTTOM_RIGHT})
     } catch (error) {
-              
-        toast.error(`Error in buying item: ${error.error.data.message}`,{position: toast.POSITION.BOTTOM_RIGHT} )
+        if(error.error){
+            toast.error(`Error in buying item: ${error.error.data.message}`,{position: toast.POSITION.BOTTOM_RIGHT} )
+        }     else{
+
+            toast.error(`Error in buying item: ${error.message}`,{position: toast.POSITION.BOTTOM_RIGHT} )
+        }
+        console.log(error);
     }
 
     }
     const placeBid = async () => {
       try {
-        const web3Modal = new Web3Modal();
-        const connection = await web3Modal.connect();
-        const provider = new ethers.providers.Web3Provider(connection);
-        const signer = provider.getSigner();
+       
         let minimumBid
         if(price){
              minimumBid = price;
@@ -90,17 +96,25 @@ const ItemDetails = () => {
         else throw new Error('Ruko thoda sabra karo');
         
         const value = ethers.utils.parseUnits(minimumBid.toString(), 'ether');
-        
+        if(!web3Signer){
+        toast.error('Please connect the wallet first',{position: toast.POSITION.BOTTOM_RIGHT})
+        return;
+    }
         let contract = new ethers.Contract(
             marketplaceAddress,
             MarketPlace.abi,
-            signer
+            web3Signer
             );
             const transaction = await contract.placeBid(tokenId, { value: value });
             await transaction.wait();
             toast.success('Success',{position: toast.POSITION.BOTTOM_RIGHT})
       } catch (error) {
-          toast.error(`Error: ${error.error.data.message}`,{position: toast.POSITION.BOTTOM_RIGHT})
+        if(error.error){
+            toast.error(`Error: ${error.error.data.message}`,{position: toast.POSITION.BOTTOM_RIGHT})
+        }else{
+            toast.error(`Error: ${error.message}`,{position: toast.POSITION.BOTTOM_RIGHT})
+        }
+        console.log(error);
       }
     }
 
@@ -174,7 +188,7 @@ async function getData(tokenId) {
             
             
             setData(nftData)
-            console.log(nftData)
+           
             setBidHistory(history)
             const reservedPrice = data.reservedPrice/1000000000000000000;
 
@@ -199,12 +213,9 @@ async function getData(tokenId) {
         }
         
         getItem()
+        console.log(web3Signer);
         // console.log('final data',data)
-       
-        
-        
-
-    }, [tokenId]);
+    }, [tokenId, web3Signer]);
 
 
     const handleSubmitAuction = async (e) => {
@@ -216,9 +227,6 @@ async function getData(tokenId) {
         e.preventDefault();
         await createDirectSale();
     }
-
-
-
     
 
     return (
