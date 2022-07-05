@@ -15,7 +15,6 @@ import { useNavigate } from "react-router-dom";
 
 
 import { ethers } from 'ethers'
-import Web3Modal from 'web3modal'
 
 
 import NFTMint from '../NFTMint.json';
@@ -62,7 +61,11 @@ async function onChange(e) {
 
 async function uploadToIPFS() {
   const { name, description, collection} = formInput;
-  if (!name || !description || !fileUrl) return;
+  console.log(fileUrl)
+  if (!name || !description || !fileUrl) {
+    toast.error('Please check item details! Name, description and image are required',{position: toast.POSITION.BOTTOM_RIGHT})
+    return;
+  }
   /* first, upload to IPFS */
   const data = JSON.stringify({
     name,
@@ -102,7 +105,9 @@ async function listNFTForDirectSale() {
   try {
     
   const hash = await uploadToIPFS();
-  
+  if(!hash) {
+    return;
+  }
 
   if(!web3Signer){
     toast.error('Please connect wallet first',{position: toast.POSITION.BOTTOM_RIGHT})
@@ -143,13 +148,25 @@ async function listNFTForDirectSale() {
         navigate("/");
     }, 5000);
     } catch (error) {
-        let e = error.error.data.message;
-        
-        if(e==='execution reverted: ER_CODE_1'){
+        if(error.error){
+            let e= error.error.data.message;
+            if(e==='execution reverted: ER_CODE_1'){
             toast.error(`Only seller can create item`,{position: toast.POSITION.BOTTOM_RIGHT} )
             return;
-        } 
-        errorNotification('Error in putting item on sale',error.message);
+        }else{
+            toast.error(`Error ${e}`,{position: toast.POSITION.BOTTOM_RIGHT} )
+            return;
+        }
+        }
+        if(error.message){
+            errorNotification('Error in putting item on sale',error.message);
+            console.log(error)
+        }else {
+            errorNotification('Error', error )
+            console.log(error)
+        }
+
+         
     }
     
 }
@@ -165,7 +182,7 @@ async function listNFTForAuction(){
     // console.log('clean initial code')
 
     const address = web3Signer._address;
-    console.log(address);
+    
     
     const startTime = Math.floor(Date.now()/1000);
     // console.log('clean getting address and startime')
@@ -206,13 +223,24 @@ async function listNFTForAuction(){
       navigate("/");
   }, 5000);
     } catch (error) {
-        let e = error.error.data.message;
-        if(e==='execution reverted: ER_CODE_1'){
+        if(error.error){
+            let e= error.error.data.message;
+            if(e==='execution reverted: ER_CODE_1'){
             toast.error(`Only seller can create item`,{position: toast.POSITION.BOTTOM_RIGHT} )
             return;
+        }else{
+            toast.error(`Error ${e}`,{position: toast.POSITION.BOTTOM_RIGHT} )
+            return;
         }
-        console.log(error)
-       errorNotification('Error in putting item on auction',error.message); 
+        }
+        if(error.message){
+            errorNotification('Error in putting item on sale',error.message);
+            console.log(error);
+        }else {
+            errorNotification('Error', error )
+            console.log(error);
+
+        } 
     }
 }
 const notify = ()=>{
@@ -347,6 +375,7 @@ setAuctionData({...formInput2});
                                         <input type="file" className="inputfile form-control" name="file"  onChange={onChange}/>
                                     </label>
                                  </form>
+                                 {fileUrl && <h4 className='ml-10 p-2 mb-2 text-success text-right'>Image uploaded!</h4>}
                                 <div className="flat-tabs tab-create-item">
                                     <h4 className="title-create-item">Select method</h4>
                                     <Tabs>

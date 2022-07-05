@@ -8,36 +8,31 @@ import {create as ipfsHttpClient} from 'ipfs-http-client';
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import axios from 'axios';
-import { ethers } from 'ethers'
-import Web3Modal from 'web3modal'
+import { useStateContext } from '../context/ContextProvider'; 
 
 const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
 
 const EditProfile = () => {
-    const {address} = useParams();
+
+    const {address} = useParams()
     
     const [formData, setFormData] = useState({address: address, name:'', email:'', avatar:''})
 
     const [userHimself, setuserHimself] = useState(false)
+    const {web3Signer} = useStateContext();
+
 
     useEffect(() => {
         const checkUser= async ()=>{
-            const web3Modal = new Web3Modal();
-            const connection = await web3Modal.connect();
-            const provider = new ethers.providers.Web3Provider(connection);
-            const signer = provider.getSigner();
-            const addressConnection = await signer.getAddress();
-    
-            console.log(addressConnection);
+            const addressConnection= web3Signer._address
+            
                 if(addressConnection.toLowerCase()===address){
                     setuserHimself(true)
-                }
+                }            
         }
         checkUser();
-    }, [])
-    
-    
-    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])   
     
     async function onChange(e) {
         const file = e.target.files[0];

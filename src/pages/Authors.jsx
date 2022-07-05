@@ -6,10 +6,9 @@ import Header from '../components/header/Header';
 import Footer from '../components/footer/Footer';
 import axios from 'axios';
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
-import { useNavigate } from "react-router-dom";
+
 import avt from '../assets/images/avatar/avt-author-tab.jpg'
-import { ethers } from 'ethers'
-import Web3Modal from 'web3modal'
+
 
 import { useStateContext } from '../context/ContextProvider'; 
 
@@ -154,7 +153,9 @@ const Authors = () => {
         getUser();
         
     },[])
+    
     useEffect(() => {
+
         const checkUser= async ()=>{
             
             const addressConnection= web3Signer._address

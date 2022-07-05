@@ -11,7 +11,6 @@ import img6 from '../assets/images/avatar/avt-8.jpg'
 import img7 from '../assets/images/avatar/avt-2.jpg'
 import imgdetail1 from '../assets/images/box-item/images-item-details2.jpg'
 import { ethers } from 'ethers'
-import Web3Modal from 'web3modal'
 import MarketPlace from '../MarketPlace.json';
 
 import { marketplaceAddress} from '../config';
@@ -23,7 +22,6 @@ import {ToastContainer, toast} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
 
-const Buffer = require('buffer/').Buffer;
 
 const APIURL =
   'https://api.thegraph.com/subgraphs/name/vromahya/forevercarat-nftquery';
