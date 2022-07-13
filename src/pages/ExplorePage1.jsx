@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import Header from '../components/header/Header';
 import Footer from '../components/footer/Footer';
 
@@ -11,6 +11,7 @@ import {ethers} from 'ethers';
 import { Accordion } from 'react-bootstrap-accordion'
 import ExploreItem from '../components/layouts/explore-04/ExploreItem';
 import defAvatar from '../assets/images/avatar/defaultAvatar.png';
+
 
 
 const APIURL = 'https://api.thegraph.com/subgraphs/name/vromahya/forevercarat-nftquery'
@@ -45,9 +46,18 @@ const client = new ApolloClient({
 const ExplorePage = () => {
 
 const [auctionData, setAuctionData] = useState([])
+
 const [Checked, setChecked] = useState([[0,0],[1,0],[2,0]]);
 
+let search = useLocation().search
 
+console.log(search)
+
+search = new URLSearchParams(search).get('search');
+
+// search = search.searchParams.get('search')
+
+console.log(search)
 
 
 const handleChecked = (f,g)=>{
@@ -149,9 +159,9 @@ return items;
     const [loading, setLoading] = useState(true);
     useEffect(()=>{
             setLoading(true)
-            const [name, orderBy, orderDirection]= getSortVariables()
+            const [status, orderBy, orderDirection]= getSortVariables()
             async function setData(){
-                let items = await getData(name, orderBy, orderDirection);
+                let items = await getData(status, orderBy, orderDirection);
                 items = items.filter(item=>item.onAuction===true||item.onDirectSale===true);
                 setAuctionData(items)
             }
@@ -175,7 +185,6 @@ return items;
                                 <ul>
                                     <li><Link to="/">Home</Link></li>
                                     <li><Link to="#">Explore</Link></li>
-                                    <li>Explore</li>
                                 </ul>
                             </div>
                         </div>

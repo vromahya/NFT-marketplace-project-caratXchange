@@ -37,6 +37,7 @@ function App() {
     if (!isError && !isLoading) {
       setWeb3Signer(signer);
     }
+    return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signer, isError, isLoading]);
 

@@ -8,7 +8,7 @@ import LiveAuction from '../components/layouts/LiveAuction';
 import TopSeller from '../components/layouts/TopSeller';
 
 import TodayPicks from '../components/layouts/TodayPicks';
-
+import ReferToEarnModal from '../components/layouts/ReferToEarnModal'
 import Create from '../components/layouts/Create';
 import axios from 'axios';
 import {ethers} from 'ethers';
@@ -108,7 +108,7 @@ async function getData() {
         let item = { 
         title: i.name,       
         tokenId: Number(i.tokenId),
-        img: i.image,
+        img: i.images instanceof Array? i.images[0] : i.image,
         onAuction: i.onAuction,
         onDirectSale: i.onDirectSale,
         price: price,
@@ -124,7 +124,7 @@ async function getData() {
         let item = { 
         title: met.data.name,       
         tokenId: Number(i.tokenId),
-        img: met.data.image,
+        img: met.data.images instanceof Array ? met.data.images[0] : met.data.image,
         onAuction: i.onAuction,
         onDirectSale: i.onDirectSale,
         price: price,
@@ -147,9 +147,10 @@ const Home01 = () => {
     const [auctionData, setAuctionData] = useState([])
     const [loading, setLoading] = useState(true);
     const [userData, setUserData] = useState();
-
+    const [ModalShow, setModalShow] = useState(true)
     useEffect(()=>{
         setLoading(true)
+        setModalShow(true)
         async function setData(){
             const items = await getData();
             const users = await getSellers();
@@ -159,6 +160,7 @@ const Home01 = () => {
             setLoading(false);
         }
         setData();
+        return ()=>{}
         // console.log(auctionData)
     },[])
 
@@ -175,6 +177,11 @@ const Home01 = () => {
             {!loading && <TopSeller data={userData} />}
             <TodayPicks data={auctionData} />
             <Create />
+             <ReferToEarnModal
+                show={ModalShow}
+                onHide={() => setModalShow(false)}
+                
+            /> 
             <Footer />
         </div>
     );

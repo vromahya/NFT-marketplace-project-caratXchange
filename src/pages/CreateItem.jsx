@@ -12,7 +12,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { useNavigate } from "react-router-dom";
 // import {sellers} from '../assets/fake-data/sellers'
-
+import axios from 'axios';
 
 import { ethers } from 'ethers'
 
@@ -27,51 +27,141 @@ import users from '../assets/fake-data/users';
 
 const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
 
+
+
+
 const CreateItem = () => {
     
     let navigate = useNavigate();
 
-const [fileUrl, setFileUrl] = useState(null);
+
 const [directBuyData,setDirectBuyData] = useState();
 const [auctionData, setAuctionData]= useState();
-const [formInput, setFormInput] = useState({price:'', name: '', description:'', collection:''});
-const [formInput2, setFormInput2] = useState({name:'', minimumBid:'', duration:'', collection:''});
+const [formInput, setFormInput] = useState({price:'', name: '', description:'', collection:'',type:''});
+const [formInput2, setFormInput2] = useState({name:'', minimumBid:'', duration:'', collection:'',type:''});
 const [previewStateFixedPice, setPreviewState] = useState(true);
 
 const [loading, setLoading] = useState(true);
 
+const [ImagesAdded, setImagesAdded] = useState(false)
+
 const [user, setUser] = useState();
+
+const [FileObjects, setFileObjects] = useState([])
+const [FileArray, setFileArray] = useState([])
 
 const {web3Signer} = useStateContext();
 
-async function onChange(e) {
-    
-  const file = e.target.files[0];
-  try {
-    const added = await client.add(file, {
-      progress: (prog) => console.log(`received: ${prog}`),
-    });
-    const url = `https://ipfs.io/ipfs/${added.path}`;
-    setFileUrl(url);
-  } catch (error) {
-    errorNotification('Error uploading file: ', error);
-  }
-//   console.log(`File url: ${fileUrl}`);
+
+
+
+const uploadFiles = async (fileArray) => {
+
+    const urls = await Promise.all(fileArray.map(async (file,index)=>{
+
+        const fileParts = file.name.split('.');
+        const fileName = fileParts[0];
+        const fileType = fileParts[1];
+        const res=await axios.post("https://forever-carat-api.herokuapp.com/api/v1/sign_s3",{
+            fileName : fileName,
+            fileType : fileType
+        })
+        const returnData = res.data.data.returnData;
+        const signedRequest = returnData.signedRequest;
+        console.log('returnData', returnData)
+        console.log('signedRequest', signedRequest)
+        const url = returnData.url;
+        console.log(index,':',url)
+        const options = {
+         headers: {
+          "Content-Type": fileType,
+          "Access-Control-Allow-Origin":"*"
+         }
+        };
+
+        try {
+            
+            const putResult = await axios.put(signedRequest,file,options)
+            console.log("Response from s3",index,putResult)    
+            return url
+        } catch (error) {
+            console.log("error",JSON.stringify(error))
+            return;
+        }       
+      
+    }))
+     return urls   
 }
 
+
+const uploadMultipleFiles = (e)=>{
+    setImagesAdded(false);
+
+    let fileObj = [];
+
+    fileObj.push(e.target.files)    
+    
+    
+    let fileObjects = FileObjects
+    let fileArray = FileArray;
+
+    for(let i=0;i<fileObj.length; i++){
+        for(let j=0; j<fileObj[i].length;j++){
+            
+            if(fileObj[i][j].size>50000000){
+                fileArray=[];
+                setFileArray([])
+                setFileObjects([])
+                errorNotification('Error in file size:', 'Upload media less than 50Mb');
+                return;
+            } 
+            if(fileObj[i][j].type==='image/png'|| fileObj[i][j].type==='image/jpeg'|| fileObj[i][j].type==='image/jpg') {
+                fileArray.push({type:'image', url: URL.createObjectURL(fileObj[i][j])});     
+                fileObjects.push(fileObj[i][j]);           
+            }
+            else if(fileObj[i][j].type==='video/mp4'|| fileObj[i][j].type==='video/avi'|| fileObj[i][j].type==='video/webm') {
+                fileArray.push({type:'video', url: URL.createObjectURL(fileObj[i][j])})
+                fileObjects.push(fileObj[i][j]);
+            }
+            else {
+                fileArray=[];
+                setFileArray([])
+                setFileObjects([])                
+                errorNotification('Error in file type:', 'Upload only PNG, JPEG, JPG, AVI, MP4, WEBM');
+                return;
+            }
+        }
+    }
+
+    setFileArray(fileArray);
+    setFileObjects(fileObjects)
+    setImagesAdded(true)
+       
+}
+
+const chooseMultipleFiles = (e)=>{
+console.log(e)
+}
+
+
+
 async function uploadToIPFS() {
-  const { name, description, collection} = formInput;
-  console.log(fileUrl)
-  if (!name || !description || !fileUrl) {
-    toast.error('Please check item details! Name, description and image are required',{position: toast.POSITION.BOTTOM_RIGHT})
-    return;
-  }
+
+    const { name, description, collection, type} = formInput;
+    
+    if (!name || !description ||FileObjects.length===0) {
+        toast.error('Please check item details! Name, description and image are required',{position: toast.POSITION.BOTTOM_RIGHT})
+        return;
+    }
+    const media = await uploadFiles(FileObjects);
+    
   /* first, upload to IPFS */
   const data = JSON.stringify({
     name,
     description,
-    image: fileUrl,
-    collection
+    images: media,
+    collection,
+    type
   });
   try {
     const added = await client.add(data);
@@ -83,14 +173,17 @@ async function uploadToIPFS() {
   }
 }
 async function uploadToIPFS2() {
-  const { name, description, collection } = formInput2;
-  if (!name || !description || !fileUrl) return;
+  const { name, description, collection, type } = formInput2;
+  if (!name || !description || !FileObjects.length===0) return;
+
+  const media = await uploadFiles(FileObjects)
   /* first, upload to IPFS */
   const data = JSON.stringify({
     name,
     description,
-    image: fileUrl,
-    collection
+    images: media,
+    collection,
+    type
   });
   try {
     const added = await client.add(data);
@@ -102,17 +195,19 @@ async function uploadToIPFS2() {
   }
 }
 async function listNFTForDirectSale() {
+    if(!web3Signer){
+      toast.error('Please connect wallet first',{position: toast.POSITION.BOTTOM_RIGHT})
+      return;
+    }
   try {
     
   const hash = await uploadToIPFS();
-  if(!hash) {
+  if(!hash) {    
     return;
   }
+  
 
-  if(!web3Signer){
-    toast.error('Please connect wallet first',{position: toast.POSITION.BOTTOM_RIGHT})
-    return;
-  }
+
   /* next, create the item */
   let mint = new ethers.Contract(
       nftMintAddress,
@@ -172,13 +267,18 @@ async function listNFTForDirectSale() {
 }
 async function listNFTForAuction(){
 
-    try {
-        const hash = await uploadToIPFS2();
-    
     if(!web3Signer){
     toast.error('Please connect wallet first',{position: toast.POSITION.BOTTOM_RIGHT})
     return;
-  }
+    }
+
+    try {    
+    const hash = await uploadToIPFS2();
+    if(!hash){
+    toast.error('Error in uploading files, Please wait for some time',{position: toast.POSITION.BOTTOM_RIGHT})
+    return;
+    }
+    
     // console.log('clean initial code')
 
     const address = web3Signer._address;
@@ -253,18 +353,12 @@ const errorNotification = (errorIn,e)=>{
 
 
 const handleSubmitTab1 = async (e) =>{
-e.preventDefault();
-await listNFTForDirectSale();
-
+    e.preventDefault();
+    await listNFTForDirectSale();
 }
 const handleSubmitTab2 = async (e) =>{
-    e.preventDefault();
-    
-    await listNFTForAuction();
-    
-   
-    
-    
+    e.preventDefault();    
+    await listNFTForAuction();  
 }
 useEffect(()=>{
     
@@ -280,6 +374,10 @@ setDirectBuyData({...formInput});
 setAuctionData({...formInput2});
 
 },[formInput, formInput2])
+
+
+
+
 
     return (
         <div className='create-item'>
@@ -311,7 +409,7 @@ setAuctionData({...formInput2});
                             <div className="sc-card-product">
                                 <div className="card-media">
                                     {
-                                        fileUrl?<img src={fileUrl} alt="Axies" />:<img src={img1} alt="Axies" />
+                                        ImagesAdded?<img src={FileArray[0]} alt="Axies" />:<img src={img1} alt="Axies" />
                                     }
                                     {formInput2.duration && 
                                     <div className="featured-countdown">
@@ -369,15 +467,29 @@ setAuctionData({...formInput2});
                          <div className="col-xl-9 col-lg-6 col-md-12 col-12">
                              <div className="form-create-item">
                                  <form action="#">
-                                    <h4 className="title-create-item">Upload file</h4>
+                                    <h4 className="title-create-item">Choose files</h4>
                                     <label className="uploadFile">
                                         <span className="filename">PNG, JPG, GIF, WEBP or MP4. Max 200mb.</span>
-                                        <input type="file" className="inputfile form-control" name="file"  onChange={onChange}/>
+                                        <input type="file" className="inputfile form-control" name="file"  onChange={(e)=>uploadMultipleFiles(e)} onDrop={(e)=>chooseMultipleFiles(e)} multiple />
                                     </label>
+                                    <div className="form-group multi-preview ml-10 mb-5">
+                                        <div className="d-flex gap-2">
+                                            {ImagesAdded && FileArray.map((media, index) => (
+                                            <div key={index} className='m-1 p-1' style={{height:"90px", width:"160px"}}>
+                                                {media.type==='image'? 
+                                                
+                                                <img  src={media.url} alt="..." className='img-thumbnail' style={{height:"100%", width:"auto"}}/> :
+                                                
+                                                <video  src={media.url} alt="..." className='img-thumbnail' style={{height:"100%", width:"auto"}}/> }
+                                                
+                                            </div>
+                                            ))} 
+                                        </div>                                                                                                                       
+                                    </div>                                    
                                  </form>
-                                 {fileUrl && <h4 className='ml-10 p-2 mb-2 text-success text-right'>Image uploaded!</h4>}
+                                 
                                 <div className="flat-tabs tab-create-item">
-                                    <h4 className="title-create-item">Select method</h4>
+                                    <h4 className="title-create-item mt-8">Select method</h4>
                                     <Tabs>
                                         <TabList>
                                             <Tab onClick={()=>setPreviewState(true)}><span className="icon-fl-tag" ></span>Fixed Price</Tab>
@@ -391,9 +503,17 @@ setAuctionData({...formInput2});
 
                                                 <h4 className="title-create-item">Title</h4>
                                                 <input type="text" placeholder="Item Name" onChange={(e)=>{setFormInput({...formInput, name: e.target.value})}} />
-
-                                                <h4 className="title-create-item">Collection <span className='text-muted' >(Optional)</span> </h4>
-                                                <input type='text' placeholder="e.g. “King collection”" onChange={(e)=>{setFormInput({...formInput, collection: e.target.value})}}></input>
+                                                <div className="d-flex gap-1">
+                                                    <div>
+                                                        <h4 className="title-create-item px-1">Collection <span className='text-muted' >(Optional)</span> </h4>
+                                                    <input className='mx-2' type='text' placeholder="e.g. “King collection”" onChange={(e)=>{setFormInput({...formInput, collection: e.target.value})}}></input>
+                                                    </div>
+                                                    <div className='ml-10'>
+                                                        <h4 className="title-create-item px-1">Type</h4>
+                                                    <input className='mx-2' type='text' placeholder="e.g. “Ring”" onChange={(e)=>{setFormInput({...formInput, type: e.target.value})}}></input>
+                                                    </div>
+                                                </div>
+                                                
                                                 <h4 className="title-create-item">Description</h4>
                                                 <textarea placeholder="e.g. “This is very limited item”" onChange={(e)=>{setFormInput({...formInput, description: e.target.value})}} maxLength={500}></textarea>
                                                                                               
@@ -415,8 +535,16 @@ setAuctionData({...formInput2});
                                                 <h4 className="title-create-item">Title</h4>
                                                 <input type="text" placeholder="Item Name" onChange={e=>setFormInput2({...formInput2, name: e.target.value})}/>
 
-                                                <h4 className="title-create-item">Collection</h4>
-                                                <input type='text' placeholder="e.g. “King's collection”" onChange={(e)=>{setFormInput2({...formInput2, collection: e.target.value})}}></input>
+                                                <div className="d-flex gap-1">
+                                                    <div>
+                                                        <h4 className="title-create-item px-1">Collection <span className='text-muted' >(Optional)</span> </h4>
+                                                    <input className='mx-2' type='text' placeholder="e.g. “King collection”" onChange={(e)=>{setFormInput({...formInput2, collection: e.target.value})}}></input>
+                                                    </div>
+                                                    <div className='ml-10'>
+                                                        <h4 className="title-create-item px-1">Type</h4>
+                                                    <input className='mx-2' type='text' placeholder="e.g. “Ring”" onChange={(e)=>{setFormInput({...formInput2, type: e.target.value})}}></input>
+                                                    </div>
+                                                </div>
                                                 <h4 className="title-create-item">Description</h4>
                                                 <textarea placeholder="e.g. “This is very limited item”" onChange={e=>setFormInput2({...formInput2, description: e.target.value})} maxLength={500}></textarea>
                                             <button className="mt-12" type='submit' >Create Item</button>

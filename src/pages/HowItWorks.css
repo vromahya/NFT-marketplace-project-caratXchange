@@ -1,0 +1,18 @@
+.qa {
+    margin: 2px;
+    margin-top: 10px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(141, 200, 255);
+    border-radius: 10px;
+}
+
+.qa:hover{
+    transform: scale(1.0125);
+    box-shadow: 3px 3px 10px 1px #2097ff, -3px 3px 10px #2097ff;
+}
+
+hr {
+    margin: auto 20px;
+    border: 1px solid #6cbbff;
+}

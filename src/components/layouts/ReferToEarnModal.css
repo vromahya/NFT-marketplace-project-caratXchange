@@ -1,0 +1,27 @@
+#ol {
+list-style: number;
+margin: 2px 2px 2px 5px
+}
+
+.li {
+
+font-size: large;
+margin: 2px 5px;
+padding-top: 2px;
+
+
+}
+
+.para {
+    font-size: smaller;
+}
+
+#refBtn:hover{
+    color: white;
+    background-color: white;
+}
+
+
+#link {
+color: blue;
+}

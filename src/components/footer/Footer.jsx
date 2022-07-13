@@ -2,7 +2,18 @@ import React, { useState ,useEffect } from 'react';
 import { Link } from 'react-router-dom'
 import logodark from '../../assets/images/logo/logo_dark.png'
 import logofooter from '../../assets/images/logo/logo2.png'
+import MailchimpSubscribe from "react-mailchimp-subscribe"
+
+import NewsletterForm from './NewsletterForm';
+
+
+
+
+
 const Footer = () => {
+    const url = process.env.REACT_APP_PUBLIC_MAILCHIMP_URL;
+    
+
     const accountList = [
         {
             title: "Create Item",
@@ -10,10 +21,6 @@ const Footer = () => {
         },
     ]
     const resourcesList = [
-        {
-            title: "Help & Support",
-            link: "/help-center"
-        },
         {
             title: "How it Works?",
             link: "/howitworks"
@@ -44,26 +51,24 @@ const Footer = () => {
         },
         {
             icon: "fab fa-facebook",
-            link: "#"
+            link: "https://m.facebook.com/Caratxchange-102614179189019/"
         },
         {
             icon: "fab fa-telegram-plane",
-            link: "#"
+            link: "https://t.me/caratxchange1"
         },
         {
             icon: "fab fa-youtube",
             link: "#"
         },
         {
-            icon: "icon-fl-tik-tok-2",
-            link: "#"
-        },
-        {
             icon: "icon-fl-vt",
             link: "#"
         },
-        
-
+        {
+            icon: "fa fa-instagram",
+            link: "https://www.instagram.com/caratxchange/"
+        }       
     ]
 
     const [isVisible, setIsVisible] = useState(false);
@@ -147,10 +152,19 @@ const Footer = () => {
                             <div className="widget widget-subcribe">
                                 <h5 className="title-widget">Subscribe Us</h5>
                                 <div className="form-subcribe">
-                                    <form id="subscribe-form" action="#" method="GET" acceptCharset="utf-8" className="form-submit">
-                                        <input name="email"  className="email" type="email" placeholder="info@yourgmail.com" required />
-                                        <button id="submit" name="submit" type="submit"><i className="icon-fl-send"></i></button>
-                                    </form>
+                                    <MailchimpSubscribe
+                                        url={url}
+                                        render={ ( props ) => {
+                                            const { subscribe, status, message } = props || {};
+                                            return (
+                                            <NewsletterForm
+                                                status={ status }
+                                                message={ message }
+                                                onValidated={ formData => subscribe( formData ) }
+                                            />
+                                            );
+                                        } }
+                                        />
                                 </div>
                                 <div className="widget-social style-1 mg-t32">
                                     <ul>

@@ -21,13 +21,8 @@ const menus = [
   },
   {
     id: 5,
-    name: 'FAQ',
-    links: '/faq',
-  },
-  {
-    id: 7,
-    name: 'Contact',
-    links: '/contact',
+    name: 'How it Works?',
+    links: '/howitworks',
   },
 ];
 
