@@ -20,7 +20,7 @@ const ReferToEarnModal = (props) => {
           <li className='li'>You and your friend will each receive 10% of your friend’s first transaction’s value as a cash reward* in your crypto wallets!</li>
         </ol>
         <div className="d-flex justify-content-center">
-          <button id='refBtn'><Link to="#" >Refer & Earn</Link></button>
+          <button id='refBtn'><Link to="https://docs.google.com/forms/d/e/1FAIpQLSdN_lDFNWMKI5DASR1-to6KpxmV8a3euWMSOU-KeCYTOOREqQ/viewform?usp=sf_link" >Refer & Earn</Link></button>
         </div>
         <div className="d-flex justify-content-between">
           <p className='para'>Note: Rewards will be credited every Friday till offer lasts</p>
