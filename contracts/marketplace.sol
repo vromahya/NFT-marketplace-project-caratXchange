@@ -173,19 +173,22 @@ contract MarketPlace is ReentrancyGuard {
     }
 
     function setOrderInTransit(uint256 _tokenId) external nonReentrant {
-        require(msg.sender == tokenIdToMarketItemMeta[_tokenId].seller);
+        require(
+            msg.sender == tokenIdToMarketItemMeta[_tokenId].seller,
+            "only seller initiate order in transit"
+        );
         tokenIdToMarketItemMeta[_tokenId].orderState.started = false;
         tokenIdToMarketItemMeta[_tokenId].orderState.inTransit = true;
         emit OrderInTransit(_tokenId);
     }
 
     function orderCompleted(uint256 _tokenId) external nonReentrant {
-        require(msg.sender == admin);
+        require(msg.sender == admin, "Order complted requires admins approval");
 
         tokenIdToMarketItemMeta[_tokenId].orderState.started = false;
         tokenIdToMarketItemMeta[_tokenId].orderState.inTransit = false;
         tokenIdToMarketItemMeta[_tokenId].orderState.completed = true;
-
+        Iauction(auctionContract).releaseFunds(_tokenId);
         emit OrderCompleted(_tokenId);
     }
 

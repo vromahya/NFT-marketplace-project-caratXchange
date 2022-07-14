@@ -21,7 +21,7 @@ const Create = () => {
         },
         {
             title: "Add Your NFTs",
-            description: "Sed ut perspiciatis un de omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem.",
+            description: "Please submit your request to marketing@caratxchange.io. Our team will evaluate the item and proposal & come back to you.",
             icon : icon3,
             colorbg : "icon-color3"
         },
@@ -58,10 +58,10 @@ const CreateItem = props => (
         <div className="sc-box-icon">
             <div className="image">
                 <div className={`icon-create ${props.item.colorbg}`}>
-                    <img src={props.item.icon} alt="" />
+                    <Link to='/howitworks'><img src={props.item.icon} alt="" /></Link>
                 </div>                                                                             
             </div>
-            <h3 className="heading"><Link to="/wallet-connect">{props.item.title}</Link></h3>
+            <h3 className="heading"><Link to="/howitworks">{props.item.title}</Link></h3>
             <p className="content">{props.item.description}</p>
         </div>
     </div>

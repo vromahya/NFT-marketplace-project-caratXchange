@@ -20,7 +20,7 @@ const CardModal = (props) => {
     
 
     const makeOffer= async ()=>{
-        console.log(web3Signer)
+        
         if(!web3Signer){
             setError(true)
             setWalletError('Connect Wallet Please!')

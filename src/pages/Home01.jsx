@@ -18,6 +18,8 @@ import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
 
 import { useState, useEffect } from 'react';
 
+import {useStateContext} from '../context/ContextProvider'
+
 
 const APIURL =
   'https://api.thegraph.com/subgraphs/name/vromahya/forevercarat-nftquery';
@@ -108,7 +110,7 @@ async function getData() {
         let item = { 
         title: i.name,       
         tokenId: Number(i.tokenId),
-        img: i.images instanceof Array? i.images[0] : i.image,
+        img: i.images[0],
         onAuction: i.onAuction,
         onDirectSale: i.onDirectSale,
         price: price,
@@ -124,7 +126,7 @@ async function getData() {
         let item = { 
         title: met.data.name,       
         tokenId: Number(i.tokenId),
-        img: met.data.images instanceof Array ? met.data.images[0] : met.data.image,
+        img: met.data.images[0],
         onAuction: i.onAuction,
         onDirectSale: i.onDirectSale,
         price: price,
@@ -147,19 +149,25 @@ const Home01 = () => {
     const [auctionData, setAuctionData] = useState([])
     const [loading, setLoading] = useState(true);
     const [userData, setUserData] = useState();
-    const [ModalShow, setModalShow] = useState(true)
+    const [ModalShow, setModalShow] = useState(false)
+    const {FirstLoad, setFirstLoad} = useStateContext();
+
     useEffect(()=>{
         setLoading(true)
-        setModalShow(true)
+        
+        if(FirstLoad) setModalShow(true)
         async function setData(){
             const items = await getData();
             const users = await getSellers();
             setUserData(users)
+            console.log(items)
             setAuctionData(items)
             // console.log(items)
             setLoading(false);
         }
         setData();
+        setFirstLoad(false)
+        
         return ()=>{}
         // console.log(auctionData)
     },[])

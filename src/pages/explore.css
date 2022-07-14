@@ -1,0 +1,15 @@
+#select-right {
+    z-index: -2;
+}
+#select-left {
+    z-index: -2;
+}
+
+#select-right:active {
+    z-index: 2;
+}
+
+#select-left:active {
+    z-index: 2;
+}
+

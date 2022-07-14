@@ -1,6 +1,6 @@
 #ol {
 list-style: number;
-margin: 2px 2px 2px 5px
+
 }
 
 .li {
@@ -8,12 +8,11 @@ margin: 2px 2px 2px 5px
 font-size: large;
 margin: 2px 5px;
 padding-top: 2px;
-
-
+list-style: auto;
 }
 
 .para {
-    font-size: smaller;
+    font-size: 11px;
 }
 
 #refBtn:hover{

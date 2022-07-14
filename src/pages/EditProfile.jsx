@@ -56,8 +56,7 @@ const EditProfile = () => {
     const handleSubmit = (e)=>{
         e.preventDefault();
         
-        const data = JSON.stringify({...formData})  
-          
+        const data = JSON.stringify({...formData})           
         
         axios.put(`https://forever-carat-api.herokuapp.com/api/v1/user/${address}`,data,{headers:{"Content-Type" : "application/json"}})
         .then(e=>notify(e))

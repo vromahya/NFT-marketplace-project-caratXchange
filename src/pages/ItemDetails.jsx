@@ -15,7 +15,7 @@ import MarketPlace from '../MarketPlace.json';
 import CardModal from '../components/layouts/CardModal';
 import { marketplaceAddress } from '../config';
 import { IconContext } from "react-icons";
-import {BsShare} from 'react-icons/bs'
+import { BsShare } from 'react-icons/bs'
 import axios from 'axios';
 
 import { ToastContainer, toast } from 'react-toastify'
@@ -23,7 +23,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import ImageGallery from '../components/ImageGallery';
-import {AiFillHeart} from 'react-icons/ai'
+import { AiFillHeart } from 'react-icons/ai'
 import ShareModal from '../components/layouts/ShareModal';
 
 
@@ -57,8 +57,8 @@ const ItemDetails = () => {
 
     const [WishList, setWishList] = useState(false)
     // const [item, setItem] = useState({name:});
-    const {pathname} = useLocation()
-    const url=`https://www.caratxchange.com${pathname}`
+    const { pathname } = useLocation()
+    const url = `https://www.caratxchange.com${pathname}`
 
     const [price, setPrice] = useState();
     const [priceDirect, setPriceDirect] = useState();
@@ -100,7 +100,7 @@ const ItemDetails = () => {
             if (price) {
                 minimumBid = price;
             }
-            else throw new Error('Ruko thoda sabra karo');
+
 
             const value = ethers.utils.parseUnits(minimumBid.toString(), 'ether');
             if (!web3Signer) {
@@ -209,16 +209,44 @@ const ItemDetails = () => {
 
                 setNotOnSale(false)
             }
-
-
-
             // console.log(userData)
             setLoading(false)
-            
-            const bidData = await getBidData(history);
-            
-            setBidHistory(bidData)
-            
+            if (nftData.onAuction) {
+
+                const bidData = await getBidData(history);
+
+                setBidHistory(bidData)
+            }
+            if(nftData.onDirectSale){
+
+                
+
+                const getOffers = async ()=>{
+                    let offers = await axios.get(`https://forever-carat-api.herokuapp.com/api/v1/offers/offerbyid/${tokenId}`)
+                    if(!offers) return [];
+                offers = offers.data.offers;
+                const offerData = Promise.all(offers.map(async offer=>{
+                    const meta = await axios.get(`https://forever-carat-api.herokuapp.com/api/v1/user/${offer.offerer}`)
+                    
+                    const time= Math.floor((Date.now()-Date.parse(new Date(offer.createdAt)))/1000)/3600
+
+                    const { avatar, name, address } = meta.data.user;
+                    const bidder = {
+                        id: address,
+                        bidder: name === 'Not updated' ? address : name,
+                        image: avatar,
+                        time: time,
+                        price: offer.amount,
+                    }
+                    return bidder;
+                }))
+                return offerData
+                }
+                const bidData = await getOffers();
+                setBidHistory(bidData)
+                
+            }
+
             checkWishList()
             setBidLoad(false)
             // console.log('data', additionalData)   
@@ -229,19 +257,37 @@ const ItemDetails = () => {
         getItem()
 
         // console.log('final data',data)
-    
-    return ()=>{}
+
+        return () => { }
     }, [tokenId]);
 
-    const checkWishList=async ()=>{
-        let buyer = await axios.get(`https://forever-carat-api.herokuapp.com/api/v1/user/${web3Signer._address}`)
-        const wishList=buyer.data.user.wishList
-        if(!wishList) return;
+    const checkWishList = async () => {
 
-        if(wishList.indexOf(tokenId)===-1) return;
-        else setWishList(true)
-    }
-    
+        const address = web3Signer?._address;
+        
+        
+        const wishCheck = async ()=>{
+            let buyer = await axios.get(`https://forever-carat-api.herokuapp.com/api/v1/user/${address}`)
+        const wishList = buyer.data.user.wishList
+        if (!wishList) return;
+        
+        if (wishList.indexOf(tokenId) === -1) return;
+        else setWishList(true)       
+        }
+        if(!address) {
+                setTimeout(wishCheck, 5000)
+            }
+        else{
+        let buyer = await axios.get(`https://forever-carat-api.herokuapp.com/api/v1/user/${address}`)
+        const wishList = buyer.data.user.wishList
+        if (!wishList) return;
+        
+        if (wishList.indexOf(Number(tokenId)) === -1) return;
+        else setWishList(true) 
+        }    
+        
+   }
+
     const handleSubmitAuction = async (e) => {
         e.preventDefault();
         await placeBid();
@@ -253,39 +299,38 @@ const ItemDetails = () => {
     }
 
     const getBidData = async (history) => {
-        if(history.length===0) return [];
-        
-        const bidData = await Promise.all(history.map( async bidData=>{
-            
+        if (history.length === 0) return [];
+
+        const bidData = await Promise.all(history.map(async bidData => {
+
             const meta = await axios.get(`https://forever-carat-api.herokuapp.com/api/v1/user/${bidData.bidder.id}`)
-            const time = Math.floor(((Date.now()/1000) - bidData.createdAtTimeStamp)/3600)
-            const {avatar, name, address} = meta.data.user;
+            const time = Math.floor(((Date.now() / 1000) - bidData.createdAtTimeStamp) / 3600)
+            const { avatar, name, address } = meta.data.user;
 
             const bidder = {
                 id: address,
-                bidder: name==='Not updated'? address : name,
-                image:avatar,
+                bidder: name === 'Not updated' ? address : name,
+                image: avatar,
                 time: time,
-                price: bidData.bid/1000000000000000000
+                price: bidData.bid / 1000000000000000000
             }
 
             return bidder
         }))
         return bidData
     }
-    const handleWishList = async ()=>{
+    const handleWishList = async () => {
+        if (!web3Signer) toast.error(`Error: Please connect wallet first, if connected wait for some time`, { position: toast.POSITION.BOTTOM_RIGHT })
         
-        if(WishList) {
-            axios.put(`https://forever-carat-api.herokuapp.com/api/v1/user/wishlist/${web3Signer._address}`,{tokenId:tokenId},{headers:{"Content-Type" : "application/json"}})
-            setWishList(false)
-            return;
-        }else{
-            axios.put(`https://forever-carat-api.herokuapp.com/api/v1/user/wishlistrm/${web3Signer._address}`,{tokenId:tokenId}, {headers:{"Content-Type" : "application/json"}})
-            setWishList(true)
+        
+        if (WishList) {
+            axios.put(`https://forever-carat-api.herokuapp.com/api/v1/user/wishlist/${web3Signer._address}`, { tokenId: tokenId }, { headers: { "Content-Type": "application/json" } })
+            
+        } else {
+            axios.put(`https://forever-carat-api.herokuapp.com/api/v1/user/wishlistrm/${web3Signer._address}`, { tokenId: tokenId }, { headers: { "Content-Type": "application/json" } })
         }
+        setWishList(!WishList)
     }
-    
-
 
     return (
         <div className='item-details'>
@@ -315,7 +360,7 @@ const ItemDetails = () => {
                         <div className="col-xl-6 col-md-12">
                             <div className="content-left">
                                 <div className="media">
-                                    {loading ? <img src={imgdetail1} alt="Axies" /> : data.images ? <ImageGallery images={data.images} /> : <img src={data.image} alt="Axies" />}
+                                    {loading ? <img src={imgdetail1} alt="Axies" /> : <ImageGallery images={data.images} />}
                                 </div>
                             </div>
                         </div>
@@ -326,18 +371,17 @@ const ItemDetails = () => {
                                         <div className="left">
                                             {loading ? <h2>loading</h2> : <h2 className='text-capitalize' >{data.name}</h2>}
                                         </div>
-                                        <div className="right d-flex flex-row-reverse mr-1">                                            
-                                            <IconContext.Provider value={{ color: (()=>(WishList?"red":"light-grey"))(), size:"22px" }}>
-                                                <div onClick={handleWishList} className='m-3'>
+                                        <div className="right d-flex flex-row-reverse mr-1">
+                                            <IconContext.Provider value={{ color: (() => (WishList ? "red" : ""))(), size: "22px" }}>
+                                                <div onClick={handleWishList} className='m-3' style={{ cursor: "pointer" }}>
                                                     <AiFillHeart />
                                                 </div>
                                             </IconContext.Provider>
-                                            <IconContext.Provider value={{size:"22px" }}>
-                                                <div onClick={()=>setShareModalShow(true)} className='m-3'>
-                                                    <BsShare/>
+                                            <IconContext.Provider value={{ size: "22px" }}>
+                                                <div onClick={() => setShareModalShow(true)} className='m-3' style={{ cursor: "pointer" }}>
+                                                    <BsShare />
                                                 </div>
-                                            </IconContext.Provider>                                        
-                                            
+                                            </IconContext.Provider>
                                         </div>
                                     </div>
                                     <div className="client-infor sc-card-product">
@@ -395,76 +439,77 @@ const ItemDetails = () => {
                                             </div> : <></>}
                                         </div>}
                                     </div>
-                                    <div className='d-flex'>
-                                        {
-                                            loading ? <h5>loading</h5> : notOnSale ? <h5 className='mb-2 p-1'>Not on sale</h5> : data.onAuction ? <button onClick={() => setShowAuctionForm(!showAuctionForm)} className="sc-button loadmore style bag fl-button pri-3"><span>Place a bid</span></button> : <button onClick={() => { setShowDirectBuyForm(!showDirectBuyForm) }} className="sc-button loadmore style bag fl-button pri-3"><span>Buy Now</span></button>
-                                        }
-                                        {
-                                            showAuctionForm && 
-                                            
-                                            <div className='flex-column'>
-                                                <form onSubmit={handleSubmitAuction}>
-                                                    <input type="text" placeholder="enter bid amount" onChange={e => setPrice(e.target.value)} />
-                                                    <button className="sc-button loadmore style bag fl-button pri-3 mt-10" type='submit'>Place Bid</button>
-                                                </form>
-                                            </div>                                          
+                                    <div className="d-flex">
+                                        <div>
+                                            {
+                                                loading ? <h5>loading</h5> : notOnSale ? <h5 className='mb-2 p-1'>Not on sale</h5> : data.onAuction ? <button onClick={() => setShowAuctionForm(!showAuctionForm)} className="sc-button loadmore style bag fl-button pri-3"><span>Place a bid</span></button> : <button onClick={() => { setShowDirectBuyForm(!showDirectBuyForm) }} className="sc-button loadmore style bag fl-button pri-3"><span>Buy Now</span></button>
+                                            }
+                                            {
+                                                showAuctionForm &&
+                                                <div >
+                                                    <form onSubmit={handleSubmitAuction} className='d-flex' style={{ height: '40px' }} >
+                                                        <input type="text" placeholder="enter bid amount" onChange={e => setPrice(e.target.value)} />
+                                                        <button className="loadmore fl-button" type='submit'>Place Bid</button>
+                                                    </form>
+                                                </div>
 
-                                        }
-                                        {
-                                            showDirectBuyForm && 
-                                            <div className='ml-5'>
-                                                <form onSubmit={handleSubmitDirectBuy}>
-                                                    <button className="sc-button loadmore style bag fl-button pri-3" type='submit'>Confirm Buy</button>
-                                                </form>
-                                            </div>
-                                        }
-                                        {loading?<></>:notOnSale?<></>:data.onDirectSale && <div className='ml-5'>
-                                            <button className="sc-button loadmore style bag fl-button pri-3" type='submit' onClick={()=>{setModalShow(true)}}>Make an Offer</button>
+                                            }
+                                            {
+                                                showDirectBuyForm &&
+                                                <div className='ml-5'>
+                                                    <form onSubmit={handleSubmitDirectBuy}>
+                                                        <button className="sc-button loadmore style bag fl-button pri-3" type='submit'>Confirm Buy</button>
+                                                    </form>
+                                                </div>
+                                            }
+                                        </div>
+                                        {loading ? <></> : notOnSale ? <></> : data.onDirectSale && <div>
+                                            <button className="sc-button loadmore style bag fl-button pri-3 ml-5" type='submit' onClick={() => { setModalShow(true) }}>Make an Offer</button>
                                         </div>}
                                     </div>
 
                                     <div className="flat-tabs themesflat-tabs">
                                         <Tabs>
                                             <TabList>
-                                                <Tab>Bid History</Tab>
+                                                <Tab>{loading?'loading':data.onAuction? 'Bid History':'Offers History'}</Tab>
                                                 <Tab>Info</Tab>
                                             </TabList>
                                             <TabPanel>
-                                            {BidLoad?<div>Loading</div>: <ul className="bid-history-list">
-                                                {
-                                                    bidHistory.length!==0 && bidHistory.map((item, index) => (
-                                                        <li key={index} item={item}>
-                                                            <div className="content">
-                                                                <div className="client">
-                                                                    <div className="sc-author-box style-2">
-                                                                        <div className="author-avatar">
-                                                                            <Link to={`/authors/${item.id}`}>
-                                                                                <img src={item.image} alt="Axies" className="avatar" />
-                                                                            </Link>
-                                                                            <div className="badge"></div>
-                                                                        </div>
-                                                                        <div className="author-infor">
-                                                                            <div className="name">
-                                                                                <h6><Link to={`/authors/${item.id}`}>{item.bidder} </Link></h6> <span> Placed a bid</span>
+                                                {BidLoad ? <div>Loading</div> : <ul className="bid-history-list">
+                                                    {
+                                                        bidHistory.length !== 0 && bidHistory.map((item, index) => (
+                                                            <li key={index} item={item}>
+                                                                <div className="content">
+                                                                    <div className="client">
+                                                                        <div className="sc-author-box style-2">
+                                                                            <div className="author-avatar">
+                                                                                <Link to={`/authors/${item.id}`}>
+                                                                                    <img src={item.image} alt="Axies" className="avatar" />
+                                                                                </Link>
+                                                                                <div className="badge"></div>
                                                                             </div>
-                                                                            <span className="time">{item.time} hours ago</span>
+                                                                            <div className="author-infor">
+                                                                                <div className="name">
+                                                                                    <h6><Link to={`/authors/${item.id}`}>{item.bidder} </Link></h6> <span> Placed a bid</span>
+                                                                                </div>
+                                                                                <span className="time">{item.time} hours ago</span>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
+                                                                    <div className="price">
+                                                                        <h5>{item.price} MATIC</h5>
+                                                                    </div>
                                                                 </div>
-                                                                <div className="price">
-                                                                    <h5>{item.price} MATIC</h5>                                                                    
-                                                                </div>
-                                                            </div>
-                                                        </li>
-                                                    ))
-                                                }
-                                            </ul>}
-                                        </TabPanel>
-                                        <TabPanel>
-                                            <div className="provenance">
-                                                {loading?<p>loading</p>: <p>{creatorData.userInfo}</p>}
-                                            </div>
-                                        </TabPanel>
+                                                            </li>
+                                                        ))
+                                                    }
+                                                </ul>}
+                                            </TabPanel>
+                                            <TabPanel>
+                                                <div className="provenance">
+                                                    {loading ? <p>loading</p> : <p>{creatorData.userInfo}</p>}
+                                                </div>
+                                            </TabPanel>
                                         </Tabs>
                                     </div>
                                 </div>
@@ -480,20 +525,20 @@ const ItemDetails = () => {
                 <h3 className="text-grey fw-bold text-decoration-underline">Proof of Authenticity</h3>
             </div>
             <div className="d-flex m-5">
-                <div className="flex-column p-2 mx-2" style={{borderWidth: "1px", borderStyle: 'solid', borderColor: '#c0c0c0', borderRadius: '10px'}} >
+                <div className="flex-column p-2 mx-2" style={{ borderWidth: "1px", borderStyle: 'solid', borderColor: '#c0c0c0', borderRadius: '10px' }} >
                     <h4 className='p-1 m-1'>Contract Address</h4>
-                    <div className="h-1 w-full" style={{borderWidth: "1px", borderStyle: 'solid', borderColor: '#5142fc', borderRadius: '10px'}}></div>
-                    <Link className='p-1 m-1' to='https://mumbai.polygonscan.com/address/0x421d38e77c71350aa4B3F28e90071751F4f4acd9'><h4 className='overflow-hidden'>0x421d38e77c71350aa4B3F28e90071751F4f4acd9</h4></Link>
+                    <div className="h-1 w-full" style={{ borderWidth: "1px", borderStyle: 'solid', borderColor: '#5142fc', borderRadius: '10px' }}></div>
+                    <a className='p-1 m-1' href='https://mumbai.polygonscan.com/address/0x421d38e77c71350aa4B3F28e90071751F4f4acd9'><h4 className='overflow-hidden'>0x421d38e77c71350aa4B3F28e90071751F4f4acd9</h4></a>
                 </div>
-                <div className="flex-column p-2 mx-2" style={{borderWidth: "1px", borderStyle: 'solid', borderColor: '#c0c0c0', borderRadius: '10px'}}>
+                <div className="flex-column p-2 mx-2" style={{ borderWidth: "1px", borderStyle: 'solid', borderColor: '#c0c0c0', borderRadius: '10px' }}>
                     <h4 className='p-1 m-1'>BlockChain</h4>
-                    <div className="h-1 w-full" style={{borderWidth: "1px", borderStyle: 'solid', borderColor: '#5142fc', borderRadius: '10px'}}></div>
+                    <div className="h-1 w-full" style={{ borderWidth: "1px", borderStyle: 'solid', borderColor: '#5142fc', borderRadius: '10px' }}></div>
                     <h4 className='fs-4 fw-bolder p-1 m-1' >Polygon</h4>
                 </div>
-                <div className="flex-column p-2 mx-2" style={{borderWidth: "1px", borderStyle: 'solid', borderColor: '#c0c0c0', borderRadius: '10px'}} >
+                <div className="flex-column p-2 mx-2" style={{ borderWidth: "1px", borderStyle: 'solid', borderColor: '#c0c0c0', borderRadius: '10px' }} >
                     <h4 className='p-1 m-1'>Token ID</h4>
-                    <div className="h-1 w-full" style={{borderWidth: "1px", borderStyle: 'solid', borderColor: '#5142fc', borderRadius: '10px'}}></div>
-                    <h4 className='fs-4 p-1 m-1'>{tokenId}</h4>
+                    <div className="h-1 w-full" style={{ borderWidth: "1px", borderStyle: 'solid', borderColor: '#5142fc', borderRadius: '10px' }}></div>
+                    <h4 className='fs-4 p-1 m-1 text-center'>{tokenId}</h4>
                 </div>
             </div>
             <CardModal
@@ -501,9 +546,9 @@ const ItemDetails = () => {
                 onHide={() => setModalShow(false)}
                 tokenId={tokenId}
             />
-            <ShareModal 
+            <ShareModal
                 show={shareModalShow}
-                onHide={() => setShareModalShow(false)} 
+                onHide={() => setShareModalShow(false)}
                 url={url} />
             <Footer />
         </div>

@@ -68,10 +68,9 @@ const uploadFiles = async (fileArray) => {
         })
         const returnData = res.data.data.returnData;
         const signedRequest = returnData.signedRequest;
-        console.log('returnData', returnData)
-        console.log('signedRequest', signedRequest)
+        
         const url = returnData.url;
-        console.log(index,':',url)
+        
         const options = {
          headers: {
           "Content-Type": fileType,
@@ -81,11 +80,10 @@ const uploadFiles = async (fileArray) => {
 
         try {
             
-            const putResult = await axios.put(signedRequest,file,options)
-            console.log("Response from s3",index,putResult)    
+            await axios.put(signedRequest,file,options)              
             return url
         } catch (error) {
-            console.log("error",JSON.stringify(error))
+            errorNotification("error",JSON.stringify(error))
             return;
         }       
       
@@ -135,6 +133,7 @@ const uploadMultipleFiles = (e)=>{
 
     setFileArray(fileArray);
     setFileObjects(fileObjects)
+    console.log(FileArray)
     setImagesAdded(true)
        
 }
@@ -409,7 +408,7 @@ setAuctionData({...formInput2});
                             <div className="sc-card-product">
                                 <div className="card-media">
                                     {
-                                        ImagesAdded?<img src={FileArray[0]} alt="Axies" />:<img src={img1} alt="Axies" />
+                                        ImagesAdded?<img src={FileArray[0].url} alt="Axies" />:<img src={img1} alt="Axies" />
                                     }
                                     {formInput2.duration && 
                                     <div className="featured-countdown">

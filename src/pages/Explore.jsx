@@ -246,14 +246,14 @@ const Explore = () => {
         let item = { 
         title: meta.data.name,       
         tokenId: Number(i.tokenId),
-        img: meta.data.images? meta.data.images[0] : meta.data.image,
+        img: meta.data.images[0],
         price: price,
         imgAuthor: imgAuthor,
         nameAuthor: nameAuthor,
         onAuction: i.onAuction,
         onDirectSale: i.onDirectSale,
         collection: meta.data.collection,
-        type: meta.data.type? meta.data.type : 'all',
+        type: meta.data.type,
         brand: 'all',
         chain: 'polygon'           
         }
@@ -268,7 +268,6 @@ return items;
         
     }
     const getDropdownValueRight = (item)=>{
-
         
         return item.content.find((e)=>e.value===SortVariablesRight[item.title]).field;
                
@@ -313,7 +312,7 @@ return items;
                     <div className="row">
                         <div className="col-md-12">
                             <div className="wrap-box explore-1 flex mg-bt-40">
-                                <div className="seclect-box style-1 gap-1">
+                                <div className="seclect-box style-1 gap-1" id='select-left' >
                                     {dropDownFieldsLeft.map((item)=>(                                        
                                         <div id={item.id} key={item.id} className="dropdown">                                        
                                         <Link to="#" className="btn-selector nolink mx-2 px-5">{item.title+' : ' + getDropdownValueLeft(item) }</Link>
@@ -325,7 +324,7 @@ return items;
                                     </div>
                                     ))}                                    
                                 </div>
-                                <div className="seclect-box style-2 box-right">
+                                <div className="seclect-box style-2 box-right overflow-hidden" id='select-right'>
                                     {dropDownFieldsRight.map((item)=>(                                        
                                         <div id={item.id} key={item.id} className="dropdown">                                        
                                         <Link to="#" className="btn-selector nolink mx-2 px-5">{item.title+':'+ getDropdownValueRight(item) }</Link>

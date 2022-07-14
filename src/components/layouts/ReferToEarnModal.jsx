@@ -16,11 +16,11 @@ const ReferToEarnModal = (props) => {
         
         <ol id='ol'>
           <li className='li'>Refer up to 10 friends to join CaratXchange and purchase a jewelery NFT</li>
-          <li className='li'>Enter their Email IDs on this <Link to="#" id='link'>form</Link>  </li>
+          <li className='li'>Enter their Email IDs on this <a href="https://docs.google.com/forms/d/e/1FAIpQLSdN_lDFNWMKI5DASR1-to6KpxmV8a3euWMSOU-KeCYTOOREqQ/viewform?usp=sf_link" id='link'>form</a>  </li>
           <li className='li'>You and your friend will each receive 10% of your friend’s first transaction’s value as a cash reward* in your crypto wallets!</li>
         </ol>
         <div className="d-flex justify-content-center">
-          <button id='refBtn'><Link to="https://docs.google.com/forms/d/e/1FAIpQLSdN_lDFNWMKI5DASR1-to6KpxmV8a3euWMSOU-KeCYTOOREqQ/viewform?usp=sf_link" >Refer & Earn</Link></button>
+          <button id='refBtn'><a href="https://docs.google.com/forms/d/e/1FAIpQLSdN_lDFNWMKI5DASR1-to6KpxmV8a3euWMSOU-KeCYTOOREqQ/viewform?usp=sf_link" >Refer & Earn</a></button>
         </div>
         <div className="d-flex justify-content-between">
           <p className='para'>Note: Rewards will be credited every Friday till offer lasts</p>

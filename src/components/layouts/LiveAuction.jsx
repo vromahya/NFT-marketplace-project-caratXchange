@@ -61,6 +61,7 @@ const LiveAuction = props => {
                                                             <div className="swiper-slide">
                                                                 <div className="slider-item">										
                                                                     <div className="sc-card-product">
+                                                                        <Link to={`/item-details/${item.tokenId}`}>
                                                                         <div className="card-media">                                                                            
                                                                             <Link to={`/item-details/${item.tokenId}`}><img src={item.img} alt="axies" /></Link>
                                                                             {/* <Link to="/login" className="wishlist-button heart"><span className="number-like">{item.wishlist}</span></Link> */}
@@ -69,9 +70,9 @@ const LiveAuction = props => {
                                                                                 <Countdown date={item.auctionEndAt*1000}>
                                                                                     <span>Auction Ended</span>
                                                                                 </Countdown>
-                                                                            </div>
-                                                                            
+                                                                            </div>                                                                            
                                                                         </div>
+                                                                        </Link>
                                                                         <div className="card-title">
                                                                             <h5><Link to={`/item-details/${item.tokenId}`}>{item.title}</Link></h5>
                                                                         </div>

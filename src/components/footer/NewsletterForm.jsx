@@ -12,8 +12,8 @@ const NewsletterForm = ( { status, message, onValidated }) => {
    *
    * @return {{value}|*|boolean|null}
    */
-  const handleFormSubmit = () => {
-
+  const handleFormSubmit = (e) => {
+    e.preventDefault()
     setError(null);
 
     if ( ! email ) {
@@ -60,7 +60,6 @@ const NewsletterForm = ( { status, message, onValidated }) => {
     const formattedMessage = result?.[1]?.trim() ?? null;
     return formattedMessage ? decode( formattedMessage ) : null;
   }
-
   return (
     <>
       <form>        

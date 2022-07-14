@@ -1,3 +1,3 @@
-export const auctionAddress = "0xa5B2D8B2D95D46CA6e08a8d2F99C12719Bd1fc9E"
-export const marketplaceAddress = "0xe63a97c77a9bfD8d1cAF6d9D64443221CD829aca"
-export const nftMintAddress = "0x421d38e77c71350aa4B3F28e90071751F4f4acd9"
+export const auctionAddress = "0xB031a2A10a2C172F52fc98DFaA268F14dbFfFC7a"
+export const marketplaceAddress = "0xaab1D1efc6A55cdD1497679390d646D73Ccd755D"
+export const nftMintAddress = "0x7D3B028eA67FDE977C32b689C739Eb11aab877cf"

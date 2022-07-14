@@ -8,7 +8,7 @@ import { BiShoppingBag } from 'react-icons/bi'
 import { BsCurrencyDollar } from 'react-icons/bs'
 import { GiGearHammer } from 'react-icons/gi'
 import { FaRegHandshake } from 'react-icons/fa'
-import {AiOutlineRight} from 'react-icons/ai'
+import { AiOutlineRight } from 'react-icons/ai'
 import Tab from 'react-bootstrap/Tab'
 import { Row, Col, Nav } from 'react-bootstrap'
 import './HowItWorks.css'
@@ -23,7 +23,7 @@ const HelpCenter = () => {
     const [dataBox] = useState(
         [
             {
-                index:1,
+                index: 1,
                 icon: BsInfoCircle,
                 title: 'Getting Started',
                 description: 'Learn about CaratXchange and understand basic things about us',
@@ -48,10 +48,10 @@ const HelpCenter = () => {
                     answer: 'Currently, we do not permit self-creation of NFTs on our platform. To get your products/jewelery listed as NFTs on our platform please submit your request to support@caratxchange.io. Admin will evaluate & get back to you.'
                 },
 
-            ]
+                ]
             },
-            {   
-                index:2,
+            {
+                index: 2,
                 icon: CgPlayButtonR,
                 title: 'Creating',
                 description: 'Learn about how to set up your wallet and what you can do on CaratXchange',
@@ -71,7 +71,7 @@ const HelpCenter = () => {
                 ]
             },
             {
-                index:3,
+                index: 3,
                 icon: BiShoppingBag,
                 title: 'Buying',
                 description: 'Learn about how to buy NFTs and get physical possession of jewelery',
@@ -103,7 +103,7 @@ const HelpCenter = () => {
                 ]
             },
             {
-                index:4,
+                index: 4,
                 icon: BsCurrencyDollar,
                 title: 'Selling',
                 description: 'Learn about how to sell your items on CaratXchange and listing fees on CaratXchange',
@@ -128,11 +128,11 @@ const HelpCenter = () => {
                 ]
             },
             {
-                index:5,
+                index: 5,
                 icon: GiGearHammer,
                 title: 'Creating',
                 description: 'Learn about who can create sell on CaratXchange',
-                details:[
+                details: [
                     {
                         question: "How do I create an NFT?",
                         answer: "CaratXchange is a curated Only platform which means that every NFT on our platform goes through a stringent verification process to provide our customers only with the most unique and authentic product."
@@ -144,11 +144,11 @@ const HelpCenter = () => {
                 ]
             },
             {
-                index:6,
+                index: 6,
                 icon: FaRegHandshake,
                 title: 'Developers',
                 description: 'We look forward to partnerships opportunities feel free to reach out',
-                details:[
+                details: [
                     {
                         question: "How can I partner with Fantico?",
                         answer: "We look forward to partnership opportunities, please contact marketing@caratxchange.io"
@@ -161,11 +161,11 @@ const HelpCenter = () => {
             },
         ]
     )
-    const handleClick=(index)=>{
+    const handleClick = (index) => {
         setIndex(index);
         setSelected(true)
     }
-    const handleTabChange=(index)=>{
+    const handleTabChange = (index) => {
         console.log(index)
         setIndex(index)
     }
@@ -183,7 +183,6 @@ const HelpCenter = () => {
                             <div className="breadcrumbs style2">
                                 <ul>
                                     <li><Link to="/">Home</Link></li>
-                                    <li><Link to="#">Community</Link></li>
                                     <li>Help Center</li>
                                 </ul>
                             </div>
@@ -207,15 +206,15 @@ const HelpCenter = () => {
                                 const Icon = item.icon;
                                 console.log(Icon)
                                 return (
-                                <div key={item.index} className={`sc-box-icon`} onClick={()=>handleClick(item.index)}>
-                                    <div className="icon">
-                                        <div className="icon-item">
-                                            <Icon className='text-white w-50 h-50' />
+                                    <div key={item.index} className={`sc-box-icon`} id='clickable' onClick={() => handleClick(item.index)}>
+                                        <div className="icon">
+                                            <div className="icon-item">
+                                                <Icon className='text-white w-50 h-50' />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <h4 className="heading">{item.title}</h4>
-                                    <p className="content">{item.description}</p>
-                                </div>)
+                                        <h4 className="heading">{item.title}</h4>
+                                        <p className="content">{item.description}</p>
+                                    </div>)
                             })
                         }
 
@@ -225,30 +224,30 @@ const HelpCenter = () => {
                             <Col sm={3} className='ml-15' >
                                 <Nav variant="pills" className="flex-column gap-3">
 
-                                    {dataBox.map((item,id)=>{
-                                    const Icon = item.icon;
-                                    return (                                
-                                    <Nav.Item style={{cursor:'pointer'}} >                                        
-                                            <Nav.Link eventKey={item.index} onClick={()=>handleTabChange(item.index)} className='m-2'><h5 className='flex fs-5 p-2' ><span><Icon className={` px-2 w-100 h-100 ${()=>item.index===index?'text-white bg:light grey':'text-black'}`} /></span>{item.title} <span className={`${()=>item.index===index?'text-white':'hidden'}`} style={{marginLeft:"auto"}} ><AiOutlineRight/></span></h5> </Nav.Link>
-                                    </Nav.Item>                                  
-                                    )                                    
-                                    })}                                    
+                                    {dataBox.map((item, id) => {
+                                        const Icon = item.icon;
+                                        return (
+                                            <Nav.Item style={{ cursor: 'pointer' }} >
+                                                <Nav.Link eventKey={item.index} onClick={() => handleTabChange(item.index)} className='m-2'><h5 className='flex fs-5 p-2' ><span><Icon className={` px-2 w-100 h-100 ${() => item.index === index ? 'text-white bg:light grey' : 'text-black'}`} /></span>{item.title} <span className={`${() => item.index === index ? 'text-white' : 'hidden'}`} style={{ marginLeft: "auto" }} ><AiOutlineRight /></span></h5> </Nav.Link>
+                                            </Nav.Item>
+                                        )
+                                    })}
                                 </Nav>
                             </Col>
                             <Col sm={9}>
                                 <Tab.Content>
-                                    {dataBox.map((item,id)=>(
-                                    <Tab.Pane eventKey={item.index}>
-                                        <div className='flex-row'>
-                                          {item.details.map((itemm, id)=>(
-                                            <div className="qa" key={id}>
-                                                <h4 className='p-3 ml-2 mt-10' >{itemm.question}</h4>
-                                                <hr />
-                                                <p className='p-3 ml-2'>{itemm.answer}</p>
+                                    {dataBox.map((item, id) => (
+                                        <Tab.Pane eventKey={item.index}>
+                                            <div className='flex-row'>
+                                                {item.details.map((itemm, id) => (
+                                                    <div className="qa" key={id}>
+                                                        <h4 className='p-3 ml-2 mt-10' >{itemm.question}</h4>
+                                                        <hr />
+                                                        <p className='p-3 ml-2'>{itemm.answer}</p>
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ))}      
-                                        </div>                                        
-                                    </Tab.Pane>
+                                        </Tab.Pane>
                                     ))}
                                 </Tab.Content>
                             </Col>

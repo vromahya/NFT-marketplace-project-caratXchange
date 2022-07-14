@@ -201,11 +201,15 @@ contract ReserveAuction {
             auction.highestBidder,
             _tokenId
         );
-
-        payable(auction.sellerFundsRecipient).transfer(auction.highestBid);
-
         emit AuctionEnded(_tokenId, auction);
+        
+        
+    }
+    function releaseFunds(uint256 _tokenId) external  {
 
+        Auction memory auction = auctionForNFT[_tokenId];
+        
+        payable(auction.sellerFundsRecipient).transfer(auction.highestBid);
         // Remove the auction from storage
         delete auctionForNFT[_tokenId];
     }

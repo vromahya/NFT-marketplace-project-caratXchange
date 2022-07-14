@@ -12,16 +12,18 @@ const TodayPicks = props => {
 
     const SortVariablesRight = props.SortVariablesRight;
 
+    
+
     const search = props.search;
     
     if (SortVariablesLeft.Chain !== 'all') data = data.filter(data => data.chain === 'polygon')
     
-    if (SortVariablesLeft.Price === 'less1Matic') data = data.filter(data => data.price < 1)
-    if (SortVariablesLeft.Price === 'bw1and3') data = data.filter(data => data.price <= 3 && data.price >= 1)
-    if (SortVariablesLeft.Price === 'morethan3') data = data.filter(data => data.price > 3)
+    if (SortVariablesLeft.PriceRange === 'less1Matic') data = data.filter(data => Number(data.price) < 1)
+    if (SortVariablesLeft.PriceRange === 'bw1and3') data = data.filter(data => Number(data.price) <= 3 && data.price >= 1)
+    if (SortVariablesLeft.PriceRange === 'morethan3') data = data.filter(data => Number(data.price) > 3)
     
-    if (SortVariablesLeft.Type !== 'all') data = data.filter(data => data.type === SortVariablesLeft.Type);
     
+    if (SortVariablesLeft.Type !== 'all') data = data.filter(data => data.type.toLowerCase() === SortVariablesLeft.Type);
     if (SortVariablesRight.Brand !== 'all') data = data.filter(data => data.brands === SortVariablesRight.Brand)
     
     if (search) data = data.filter(data => data.title === search || data.nameAuthor === search)

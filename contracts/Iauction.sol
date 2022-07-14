@@ -2,8 +2,9 @@
 pragma solidity ^0.8.10;
 
 interface Iauction {
-    function setEscrowContract(address _escrow) external;
 
+    
+    function setEscrowContract(address _escrow) external;
     function createAuction(
         address _tokenContract,
         uint256 _tokenId,
@@ -25,7 +26,9 @@ interface Iauction {
 
     function settleAuction(address _tokenContract, uint256 _tokenId) external;
 
-    function getHighestBid(uint256 _tokenId) external view returns (uint256);
+    function releaseFunds(uint _tokenId) external;
 
-    function getHighestBidder(uint256 _tokenId) external view returns (address);
+    function getHighestBid(uint _tokenId) external view returns(uint);
+
+    function getHighestBidder(uint _tokenId) external view returns(address);
 }

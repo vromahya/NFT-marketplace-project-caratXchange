@@ -30,11 +30,13 @@ const ItemDisplay = props => {
                         data.slice(0,visible).map((item,index) => (
                             <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-sm-6">
                                 <div className={`sc-card-product ${item.feature ? 'comingsoon' : '' } `}>
+                                    <Link to={`/item-details-02/${item.tokenId}`}>
                                     <div className="card-media">
                                         <Link to={`/item-details-02/${item.tokenId}`}><img src={item.img} alt="axies" /></Link>
                                         {/* <Link to="/login" className="wishlist-button heart"><span className="number-like">{item.wishlist}</span></Link> */}
                                         <div className="coming-soon">{item.feature}</div>
                                     </div>
+                                    </Link>
                                     <div className="card-title">
                                         <h5 className="style2"><Link to={`/item-details-02/${item.tokenId}`}>{item.title}</Link></h5>
                                         {/* <div className="tags">{item.tags}</div> */}
