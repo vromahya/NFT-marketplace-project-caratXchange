@@ -150,7 +150,7 @@ const HelpCenter = () => {
                 description: 'We look forward to partnerships opportunities feel free to reach out',
                 details: [
                     {
-                        question: "How can I partner with Fantico?",
+                        question: "How can I partner with caratxchange?",
                         answer: "We look forward to partnership opportunities, please contact marketing@caratxchange.io"
                     },
                     {
